@@ -114,6 +114,25 @@
 
   .info-box strong{color:#00a6ff}
   a{color:#00a6ff;text-decoration:none}
+
+  #toggle-btn{
+    padding:13px 40px;
+    border-radius:999px;
+    font-size:1rem;
+    font-weight:900;
+    letter-spacing:.04em;
+    border:none;
+    cursor:pointer;
+    transition:background .2s,box-shadow .2s;
+    background:#ff3355;
+    color:#fff;
+    box-shadow:0 0 18px rgba(255,51,85,.4);
+  }
+  #toggle-btn.stopped{
+    background:#00d48a;
+    box-shadow:0 0 18px rgba(0,212,138,.4);
+  }
+  #toggle-btn:hover{filter:brightness(1.15)}
 </style>
 </head>
 <body>
@@ -122,6 +141,8 @@
 
 <div id="status" class="lost">⬤ &nbsp;Waiting for model…</div>
 <div id="sock-status" class="disconnected">● Socket: disconnected</div>
+
+<button id="toggle-btn" onclick="toggleSending()">⏹ Stop Sending</button>
 
 <div id="video-wrap">
   <video id="video" autoplay muted playsinline></video>
@@ -168,7 +189,7 @@
        transports: ["polling"]
   ── */
   const socket = io({
-    transports: ["polling"]
+    transports: ["polling", "websocket"]
   });
 
   const sockEl = document.getElementById("sock-status");
@@ -288,15 +309,47 @@
     scheduleDetection();
   }
 
+  // ── Sending toggle ────────────────────────────────────────────────────────
+  var sendingEnabled = true;
+
+  function toggleSending() {
+    sendingEnabled = !sendingEnabled;
+    var btn = document.getElementById("toggle-btn");
+    if (sendingEnabled) {
+      btn.textContent = "⏹ Stop Sending";
+      btn.className   = "";
+      addLog("▶ Resumed — events sending to index", true);
+      // Immediately tell index current state
+      onStateChange(personState);
+    } else {
+      btn.textContent = "▶ Resume Sending";
+      btn.className   = "stopped";
+      addLog("⏹ Stopped — no events sent to index");
+      // Tell index to go idle when stopped
+      socket.emit("camera-person-lost");
+    }
+  }
+
   function onStateChange(detected) {
+    // Always update camera UI
     if (detected) {
       statusEl.textContent = "⬤  Person detected!";
       statusEl.className   = "detected";
-      addLog("→ PERSON DETECTED — emitting camera-person-detected", true);
-      socket.emit("camera-person-detected");
     } else {
       statusEl.textContent = "⬤  No person detected";
       statusEl.className   = "lost";
+    }
+
+    // Only emit to server if sending is enabled
+    if (!sendingEnabled) {
+      addLog("(sending stopped — event blocked)");
+      return;
+    }
+
+    if (detected) {
+      addLog("→ PERSON DETECTED — emitting camera-person-detected", true);
+      socket.emit("camera-person-detected");
+    } else {
       addLog("→ Person lost — emitting camera-person-lost", true);
       socket.emit("camera-person-lost");
     }
