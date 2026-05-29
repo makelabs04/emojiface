@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>5 Eye Expressions</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --ink-blue:#006dff;
+  --ink-blue-light:#00a6ff;
+  --ink-blue-dark:#003cff;
+}
+
+html,body{
+  width:100%;
+  min-height:100%;
+  background:#f7f7f4;
+  font-family:Arial, Helvetica, sans-serif;
+  color:#111;
+}
+
+/* START SCREEN */
+#start-screen{
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:22px;
+  cursor:pointer;
+}
+
+.start-title{
+  font-size:clamp(2rem,7vw,4.8rem);
+  font-weight:900;
+  color:var(--ink-blue-light);
+  text-shadow:0 0 10px var(--ink-blue-light),0 0 30px var(--ink-blue),0 0 60px var(--ink-blue-dark);
+}
+
+.start-sub{
+  color:#9bdcff;
+  font-weight:700;
+}
+
+.start-btn{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  background:var(--ink-blue);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:38px;
+  animation:ringPulse 1.5s infinite;
+}
+
+@keyframes ringPulse{
+  0%{box-shadow:0 0 0 0 rgba(0,109,255,.65)}
+  70%{box-shadow:0 0 0 28px rgba(0,109,255,0)}
+  100%{box-shadow:0 0 0 0 rgba(0,109,255,0)}
+}
+
+/* LIST PAGE */
+#list-page{
+  display:none;
+  min-height:100vh;
+  padding:22px;
+  background:#f7f7f4;
+}
+
+#list-page.active{display:block}
+
+.header{
+  text-align:center;
+  margin-bottom:16px;
+}
+
+.header h1{
+  font-size:clamp(1.5rem,4vw,2.5rem);
+  font-weight:900;
+  color:#0a2a4a;
+}
+
+.header p{
+  color:#2278b0;
+  font-size:14px;
+  margin-top:6px;
+  font-weight:700;
+}
+
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:22px;
+}
+
+.btn{
+  border:none;
+  border-radius:40px;
+  padding:9px 18px;
+  background:var(--ink-blue);
+  color:white;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 0 10px rgba(0,109,255,.25);
+}
+
+.btn:hover{background:var(--ink-blue-dark)}
+
+.btn.outline{
+  background:white;
+  color:var(--ink-blue);
+  border:2px solid var(--ink-blue);
+}
+
+.count{
+  padding:9px 16px;
+  background:#e7f4ff;
+  color:#1260a0;
+  border-radius:40px;
+  font-weight:800;
+  border:1px solid #c7e8ff;
+}
+
+.grid{
+  max-width:900px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:22px;
+}
+
+.card{
+  min-height:180px;
+  border:2px solid rgba(0,109,255,.16);
+  border-radius:18px;
+  background:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  position:relative;
+  transition:.18s;
+}
+
+.card:hover{
+  transform:translateY(-3px);
+  border-color:var(--ink-blue-light);
+  box-shadow:0 8px 22px rgba(0,109,255,.16);
+}
+
+.card.selected{
+  border-color:var(--ink-blue);
+  background:#eef8ff;
+  box-shadow:0 0 0 4px rgba(0,109,255,.12);
+}
+
+.card.selected::after{
+  content:"✓";
+  position:absolute;
+  top:9px;
+  right:12px;
+  color:var(--ink-blue);
+  font-weight:900;
+  font-size:20px;
+}
+
+.card-face{
+  width:145px;
+  height:96px;
+  position:relative;
+  overflow:visible;
+}
+
+.card-face .face-shell{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(.58);
+}
+
+.card-label{
+  font-size:14px;
+  font-weight:900;
+  margin-top:8px;
+}
+
+/* ANIMATION PAGE */
+#anim-page{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#f7f7f4;
+  z-index:1000;
+  overflow:hidden;
+}
+
+#anim-page.active{display:block}
+
+.anim-back-btn{
+  position:absolute;
+  top:12px;
+  left:16px;
+  z-index:20;
+  border:2px solid var(--ink-blue);
+  background:#fff;
+  color:var(--ink-blue);
+  padding:8px 16px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,109,255,.18);
+}
+
+.anim-back-btn:hover{
+  background:var(--ink-blue);
+  color:#fff;
+}
+
+.anim-counter{
+  position:absolute;
+  top:19px;
+  left:126px;
+  color:#1260a0;
+  font-size:16px;
+  font-weight:900;
+  z-index:5;
+}
+
+.anim-hint{
+  position:absolute;
+  top:16px;
+  right:18px;
+  color:#2278b0;
+  font-size:13px;
+  z-index:5;
+}
+
+.anim-progress{
+  position:absolute;
+  bottom:0;
+  left:0;
+  height:5px;
+  background:var(--ink-blue-light);
+  box-shadow:0 0 12px var(--ink-blue-light);
+  width:0%;
+  z-index:5;
+}
+
+#anim-stage{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.stage-face{
+  width:250px;
+  height:135px;
+  position:relative;
+  transform:scale(3.2);
+}
+
+.stage-face .face-shell{
+  position:absolute;
+  left:0;
+  top:0;
+}
+
+/* FACE */
+.face-shell{
+  width:250px;
+  height:135px;
+}
+
+.face{
+  width:250px;
+  height:135px;
+  position:relative;
+  animation:floatFace 3s ease-in-out infinite;
+}
+
+@keyframes floatFace{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-5px)}
+}
+
+/* NILA / CRESCENT EYEBROWS */
+.brow{
+  position:absolute;
+  width:54px;
+  height:28px;
+  top:0;
+  background:transparent;
+  border-top:10px solid #f1f1f1;
+  border-radius:80px 80px 0 0;
+  filter:
+    drop-shadow(0 3px 3px rgba(0,0,0,.24))
+    drop-shadow(0 -1px 1px rgba(255,255,255,.95));
+  animation:browMove 2.4s ease-in-out infinite;
+}
+
+.brow::before,
+.brow::after{
+  display:none;
+}
+
+@keyframes browMove{
+  0%,100%{top:0}
+  50%{top:-5px}
+}
+
+.brow.left{
+  left:42px;
+  transform:rotate(-20deg);
+}
+
+.brow.right{
+  right:42px;
+  transform:rotate(20deg);
+}
+
+/* EYES - SIZE INCREASED */
+.eye{
+  position:absolute;
+  top:30px;
+  width:68px;
+  height:68px;
+  border-radius:50%;
+  border:4px solid #060606;
+  background:#050505;
+  overflow:hidden;
+  box-shadow:8px 2px 0 #000,inset 0 -9px 0 var(--ink-blue),0 5px 10px rgba(0,0,0,.24);
+  transform-origin:center;
+  animation:blink var(--blink-time,4s) infinite;
+  animation-delay:var(--blink-delay,0s);
+}
+
+.eye.left{left:34px}
+.eye.right{right:34px}
+
+@keyframes blink{
+  0%,88%,100%{transform:scaleY(1)}
+  92%{transform:scaleY(.08)}
+  95%{transform:scaleY(1)}
+}
+
+.iris{
+  position:absolute;
+  inset:6px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 68% 25%, #fff 0 16%, transparent 17%),
+    radial-gradient(circle at 35% 55%, #fff 0 7%, transparent 8%),
+    radial-gradient(circle at 50% 45%, #050505 0 55%, transparent 56%),
+    radial-gradient(circle at 50% 92%, var(--ink-blue-light) 0 24%, var(--ink-blue) 42%, transparent 44%);
+  transform:translate(var(--look-x,0px),var(--look-y,0px));
+  transition:.08s linear;
+}
+
+.eye::before{
+  content:"";
+  position:absolute;
+  width:16px;
+  height:16px;
+  background:#000;
+  border-radius:50%;
+  top:27px;
+  z-index:5;
+}
+
+.eye.left::before{left:-15px}
+.eye.right::before{right:-15px}
+
+/* WINK - SIZE MATCHED */
+.wink-eye{
+  position:absolute;
+  top:58px;
+  width:68px;
+  height:28px;
+  border-top:8px solid #111;
+  border-radius:70px 70px 0 0;
+  animation:winkAnim 1.5s ease-in-out infinite;
+}
+
+.wink-eye.left{left:34px}
+.wink-eye.right{right:34px}
+
+@keyframes winkAnim{
+  0%,100%{transform:scaleY(1)}
+  50%{transform:scaleY(.65)}
+}
+
+/* MOUTHS - MOVED DOWN */
+.mouth{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.smile{
+  bottom:-3px;
+  width:34px;
+  height:18px;
+  border-bottom:5px solid #111;
+  border-radius:0 0 50px 50px;
+  animation:smileAnim 1.5s ease-in-out infinite;
+}
+
+@keyframes smileAnim{
+  0%,100%{width:34px;height:18px}
+  50%{width:42px;height:24px}
+}
+
+.open{
+  bottom:-6px;
+  width:32px;
+  height:24px;
+  background:#111;
+  border-radius:0 0 45px 45px;
+  animation:openAnim 1.2s ease-in-out infinite;
+}
+
+.open::after{
+  content:"";
+  position:absolute;
+  width:24px;
+  height:7px;
+  left:4px;
+  top:0;
+  background:var(--ink-blue-light);
+  border-radius:0 0 20px 20px;
+}
+
+@keyframes openAnim{
+  0%,100%{height:24px}
+  50%{height:31px}
+}
+
+.wavy{
+  bottom:-3px;
+  width:34px;
+  height:14px;
+  border-bottom:5px dotted #111;
+  animation:wavyAnim .8s ease-in-out infinite;
+}
+
+@keyframes wavyAnim{
+  0%,100%{transform:translateX(-50%) rotate(0)}
+  25%{transform:translateX(-50%) rotate(4deg)}
+  75%{transform:translateX(-50%) rotate(-4deg)}
+}
+
+.think-mark{
+  position:absolute;
+  top:-9px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:34px;
+  font-weight:900;
+  color:#111;
+  animation:thinkBounce 1.2s ease-in-out infinite;
+}
+
+@keyframes thinkBounce{
+  0%,100%{top:-9px}
+  50%{top:-18px}
+}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:620px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:520px){
+  .grid{grid-template-columns:1fr}
+  .stage-face{transform:scale(2.1)}
+}
+</style>
+</head>
+
+<body>
+
+<div id="start-screen">
+  <div class="start-title">5 Expressions</div>
+  <div class="start-sub">Tap anywhere to begin</div>
+  <div class="start-btn">▶</div>
+</div>
+
+<div id="list-page">
+  <div class="header">
+    <h1> Eye Expression Player</h1>
+    <p>Only 5 expressions: Neutral, Happy, Wink Left, Wink Right, Thinking</p>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn outline" onclick="selectAll()">Select All</button>
+    <button class="btn outline" onclick="clearSelection()">Clear</button>
+    <span class="count" id="sel-count">0 selected</span>
+    <button class="btn" id="play-selected" onclick="playSelected()" style="display:none;">▶ Play Loop</button>
+    <button class="btn outline" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="anim-page">
+  <button class="anim-back-btn" type="button" onclick="event.stopPropagation(); stopPlayer();">← Back</button>
+  <div class="anim-counter" id="anim-counter"></div>
+  <div class="anim-hint">Tap / ESC / Space to stop</div>
+  <div id="anim-stage"></div>
+  <div class="anim-progress" id="anim-bar"></div>
+</div>
+
+<script>
+const expressions = [
+  ["1. Neutral","normal","smile"],
+  ["2. Happy","normal","open"],
+  ["3. Wink Left","winkL","smile"],
+  ["4. Wink Right","winkR","open"],
+  ["5. Thinking","normal","wavy","think"]
+];
+
+const grid = document.getElementById("grid");
+let selected = new Set();
+let audioCtx = null;
+let playQueue = [];
+let playIndex = 0;
+let playTimer = null;
+let isPlaying = false;
+
+function eye(side,type){
+  if(type==="winkL" && side==="left") return `<span class="wink-eye left"></span>`;
+  if(type==="winkR" && side==="right") return `<span class="wink-eye right"></span>`;
+
+  return `
+    <span class="eye ${side}">
+      <span class="iris"></span>
+    </span>
+  `;
+}
+
+function eyes(type){
+  return eye("left",type) + eye("right",type);
+}
+
+function mouth(type){
+  if(type==="smile") return `<span class="mouth smile"></span>`;
+  if(type==="open") return `<span class="mouth open"></span>`;
+  if(type==="wavy") return `<span class="mouth wavy"></span>`;
+  return "";
+}
+
+function effects(type){
+  if(type==="think") return `<span class="think-mark">?</span>`;
+  return "";
+}
+
+function faceHTML(exp,index){
+  const [name,type,mouthType,fx] = exp;
+  const blinkTime = 3.2 + (index % 5) * .3;
+  const blinkDelay = (index % 7) * .2;
+
+  return `
+    <div class="face-shell">
+      <div class="face" style="--blink-time:${blinkTime}s;--blink-delay:${blinkDelay}s;">
+        <span class="brow left"></span>
+        <span class="brow right"></span>
+        ${eyes(type)}
+        ${mouth(mouthType)}
+        ${effects(fx)}
+      </div>
+    </div>
+  `;
+}
+
+function buildGrid(){
+  grid.innerHTML = expressions.map((exp,index)=>`
+    <div class="card" data-index="${index}">
+      <div class="card-face">${faceHTML(exp,index)}</div>
+      <div class="card-label">${exp[0]}</div>
+    </div>
+  `).join("");
+
+  document.querySelectorAll(".card").forEach(card=>{
+    const index = Number(card.dataset.index);
+    let pressTimer = null;
+    let longPressed = false;
+
+    card.addEventListener("pointerdown",()=>{
+      longPressed = false;
+      pressTimer = setTimeout(()=>{
+        longPressed = true;
+        toggleSelect(index);
+      },500);
+    });
+
+    card.addEventListener("pointerup",()=>{
+      clearTimeout(pressTimer);
+      if(longPressed) return;
+
+      if(selected.size > 0){
+        toggleSelect(index);
+      }else{
+        playSingle(index);
+      }
+    });
+
+    card.addEventListener("pointerleave",()=>clearTimeout(pressTimer));
+  });
+}
+
+function toggleSelect(index){
+  selected.has(index) ? selected.delete(index) : selected.add(index);
+  refreshSelection();
+}
+
+function refreshSelection(){
+  document.querySelectorAll(".card").forEach(card=>{
+    const index = Number(card.dataset.index);
+    card.classList.toggle("selected", selected.has(index));
+  });
+
+  document.getElementById("sel-count").textContent = selected.size + " selected";
+  document.getElementById("play-selected").style.display = selected.size ? "inline-block" : "none";
+}
+
+function selectAll(){
+  selected = new Set(expressions.map((_,i)=>i));
+  refreshSelection();
+}
+
+function clearSelection(){
+  selected.clear();
+  refreshSelection();
+}
+
+function playSingle(index){
+  playQueue = [index];
+  playIndex = 0;
+  startPlayer();
+}
+
+function playSelected(){
+  if(selected.size === 0) return;
+  playQueue = [...selected];
+  playIndex = 0;
+  startPlayer();
+}
+
+function startPlayer(){
+  isPlaying = true;
+  document.getElementById("list-page").classList.remove("active");
+  document.getElementById("anim-page").classList.add("active");
+  showFrame();
+}
+
+function showFrame(){
+  clearTimeout(playTimer);
+
+  const index = playQueue[playIndex];
+  const exp = expressions[index];
+  const duration = 2600;
+
+  document.getElementById("anim-counter").textContent = `${playIndex + 1}/${playQueue.length} · ${exp[0]}`;
+  document.getElementById("anim-stage").innerHTML = `<div class="stage-face">${faceHTML(exp,index)}</div>`;
+
+  speakExpression(exp[0]);
+  playTone();
+
+  const bar = document.getElementById("anim-bar");
+  bar.style.transition = "none";
+  bar.style.width = "0%";
+
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      bar.style.transition = `width ${duration}ms linear`;
+      bar.style.width = "100%";
+    });
+  });
+
+  playTimer = setTimeout(()=>{
+    if(!isPlaying) return;
+    playIndex = (playIndex + 1) % playQueue.length;
+    showFrame();
+  },duration);
+}
+
+function stopPlayer(){
+  isPlaying = false;
+  clearTimeout(playTimer);
+
+  if(window.speechSynthesis) speechSynthesis.cancel();
+
+  const bar = document.getElementById("anim-bar");
+  bar.style.transition = "none";
+  bar.style.width = "0%";
+
+  document.getElementById("anim-page").classList.remove("active");
+  document.getElementById("list-page").classList.add("active");
+}
+
+document.getElementById("anim-page").addEventListener("click",stopPlayer);
+
+document.addEventListener("keydown",e=>{
+  if(document.getElementById("anim-page").classList.contains("active")){
+    if(e.key==="Escape" || e.key===" "){
+      e.preventDefault();
+      stopPlayer();
+    }
+  }
+});
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  }else{
+    document.exitFullscreen().catch(()=>{});
+  }
+}
+
+/* AUDIO */
+function unlock(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  if(audioCtx.state === "suspended") audioCtx.resume();
+
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("list-page").classList.add("active");
+}
+
+document.getElementById("start-screen").addEventListener("click",unlock);
+document.getElementById("start-screen").addEventListener("touchend",e=>{
+  e.preventDefault();
+  unlock();
+},{passive:false});
+
+function playTone(){
+  if(!audioCtx) return;
+
+  const now = audioCtx.currentTime;
+  const seq = [523,659,784];
+
+  seq.forEach((freq,i)=>{
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, now + i * 0.12);
+    gain.gain.setValueAtTime(0.18, now + i * 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.12);
+
+    osc.start(now + i * 0.12);
+    osc.stop(now + i * 0.12 + 0.13);
+  });
+}
+
+function speakExpression(text){
+  if(!window.speechSynthesis) return;
+
+  speechSynthesis.cancel();
+
+  const clean = text.replace(/^\d+\.\s*/,"");
+  const utter = new SpeechSynthesisUtterance(clean);
+  utter.rate = 0.95;
+  utter.pitch = 1.05;
+  utter.volume = 0.8;
+
+  setTimeout(()=>speechSynthesis.speak(utter),80);
+}
+
+/* REAL TIME EYE FOLLOW */
+let pointer = {
+  x:innerWidth / 2,
+  y:innerHeight / 2,
+  active:false,
+  last:0
+};
+
+function updatePointer(x,y){
+  pointer.x = x;
+  pointer.y = y;
+  pointer.active = true;
+  pointer.last = performance.now();
+}
+
+window.addEventListener("mousemove",e=>updatePointer(e.clientX,e.clientY));
+
+window.addEventListener("touchmove",e=>{
+  if(e.touches.length) updatePointer(e.touches[0].clientX,e.touches[0].clientY);
+},{passive:true});
+
+function clamp(v,min,max){
+  return Math.max(min,Math.min(max,v));
+}
+
+function animateEyes(){
+  const now = performance.now();
+
+  document.querySelectorAll(".face").forEach((face,i)=>{
+    const rect = face.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    let x;
+    let y;
+
+    if(pointer.active && now - pointer.last < 2500){
+      x = clamp((pointer.x - cx) / 45, -6, 6);
+      y = clamp((pointer.y - cy) / 60, -4, 4);
+    }else{
+      x = Math.sin(now / 900 + i * .5) * 4;
+      y = Math.cos(now / 1000 + i * .4) * 3;
+    }
+
+    face.style.setProperty("--look-x", x + "px");
+    face.style.setProperty("--look-y", y + "px");
+  });
+
+  requestAnimationFrame(animateEyes);
+}
+
+buildGrid();
+animateEyes();
+
+/* ═══════════════════════════════════════════════════════════════
+   SOCKET.IO — Person Detection Integration (appended, no existing
+   code was modified above this line)
+   ═══════════════════════════════════════════════════════════════ */
+(function initSocketIO() {
+  // Dynamically load Socket.IO client only when served via Node server.
+  // Falls back silently if the script is opened as a plain file.
+  var script = document.createElement("script");
+  script.src = "/socket.io/socket.io.js";
+
+  script.onload = function () {
+    var socket = io({
+      transports: ["polling"]
+    });
+
+    // Expression index constants (matches the expressions array above)
+    var EXPR_NEUTRAL = 0;
+    var EXPR_HAPPY   = 1;
+
+    /**
+     * person-detected → play Happy expression (index 1)
+     * Mirrors pressing the "2. Happy" card manually.
+     */
+    socket.on("person-detected", function () {
+      console.log("[Socket] person-detected → playSingle(HAPPY)");
+      playSingle(EXPR_HAPPY);
+    });
+
+    /**
+     * person-lost → return to Neutral expression (index 0)
+     * Mirrors pressing the "1. Neutral" card manually.
+     */
+    socket.on("person-lost", function () {
+      console.log("[Socket] person-lost → playSingle(NEUTRAL)");
+      playSingle(EXPR_NEUTRAL);
+    });
+
+    socket.on("connect", function () {
+      console.log("[Socket] index.html connected:", socket.id);
+    });
+
+    socket.on("disconnect", function () {
+      console.log("[Socket] index.html disconnected");
+    });
+  };
+
+  script.onerror = function () {
+    // Not running under Node server — no socket needed.
+    console.info("[Socket] Socket.IO not available (file:// mode). Skipping.");
+  };
+
+  document.head.appendChild(script);
+})();
+</script>
+
+</body>
+</html>

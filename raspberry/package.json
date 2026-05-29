@@ -1,0 +1,17 @@
+{
+  "name": "robot-servo-pi",
+  "version": "1.0.0",
+  "description": "Raspberry Pi servo controller — connects to Hostinger as Socket.IO client",
+  "main": "servo.js",
+  "scripts": {
+    "start": "node servo.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.2",
+    "adafruit-pca9685": "^1.0.4",
+    "i2c-bus": "^5.2.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

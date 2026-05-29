@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Camera Test — Person Detection</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  body{
+    background:#0a0f1a;
+    color:#e0eaff;
+    font-family:Arial,Helvetica,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:24px 16px;
+    gap:20px;
+  }
+
+  h1{
+    font-size:clamp(1.2rem,4vw,1.8rem);
+    color:#00a6ff;
+    font-weight:900;
+    letter-spacing:.02em;
+  }
+
+  #status{
+    padding:12px 32px;
+    border-radius:999px;
+    font-size:1.1rem;
+    font-weight:900;
+    letter-spacing:.04em;
+    transition:background .3s, color .3s, box-shadow .3s;
+    background:#1a2233;
+    color:#607090;
+    border:2px solid #223;
+  }
+
+  #status.detected{
+    background:#003cff22;
+    color:#00d4ff;
+    border-color:#00a6ff;
+    box-shadow:0 0 18px rgba(0,166,255,.35);
+  }
+
+  #status.lost{
+    background:#1a2233;
+    color:#607090;
+    border-color:#223;
+    box-shadow:none;
+  }
+
+  #video-wrap{
+    position:relative;
+    width:100%;
+    max-width:640px;
+    border-radius:14px;
+    overflow:hidden;
+    border:2px solid #1a3a5c;
+    background:#000;
+  }
+
+  #video{
+    width:100%;
+    display:block;
+  }
+
+  #canvas{
+    position:absolute;
+    top:0;left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+  }
+
+  #sock-status{
+    font-size:13px;
+    color:#405070;
+  }
+
+  #sock-status.connected{color:#00d48a}
+  #sock-status.disconnected{color:#ff4466}
+
+  #log{
+    width:100%;
+    max-width:640px;
+    background:#0d1525;
+    border:1px solid #1a3a5c;
+    border-radius:10px;
+    padding:12px 16px;
+    font-size:12px;
+    color:#405070;
+    max-height:140px;
+    overflow-y:auto;
+    font-family:monospace;
+  }
+
+  #log p{margin:2px 0;border-bottom:1px solid #111e30;padding-bottom:2px}
+  #log p.ev{color:#00a6ff}
+
+  .info-box{
+    width:100%;
+    max-width:640px;
+    background:#0d1525;
+    border:1px solid #1a3a5c;
+    border-radius:10px;
+    padding:14px 18px;
+    font-size:13px;
+    color:#607090;
+    line-height:1.7;
+  }
+
+  .info-box strong{color:#00a6ff}
+  a{color:#00a6ff;text-decoration:none}
+</style>
+</head>
+<body>
+
+<h1>🎥 Camera Test — Person Detection</h1>
+
+<div id="status" class="lost">⬤ &nbsp;Waiting for model…</div>
+<div id="sock-status" class="disconnected">● Socket: disconnected</div>
+
+<div id="video-wrap">
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="canvas"></canvas>
+</div>
+
+<div id="log"><p>— detection log —</p></div>
+
+<div class="info-box">
+  <strong>How it works:</strong><br>
+  Browser webcam + TensorFlow.js COCO-SSD detects people.<br>
+  Detected → emits <code>camera-person-detected</code> to Hostinger server.<br>
+  Lost → emits <code>camera-person-lost</code>.<br>
+  Server relays event to <a href="/" target="_blank">index.html</a> robot face.<br>
+  <br>
+  <strong>Events sent only on status change</strong>, not every frame.
+</div>
+
+<!--
+  Socket.IO client is served by our own Node server (same domain).
+  This relative path /socket.io/socket.io.js works on both
+  Hostinger VPS and Raspberry Pi without any change.
+-->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- TensorFlow.js + COCO-SSD from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+
+<script>
+  "use strict";
+
+  /* ── Socket.IO ──────────────────────────────────────────────────────────────
+     On Hostinger the page is served from the same domain as the Node server,
+     so io() with no arguments connects to window.location.origin automatically.
+
+     IMPORTANT: We specify transports explicitly.
+     - Hostinger VPS (with Nginx proxy): ["polling", "websocket"] works fine
+       as long as your Nginx config has the upgrade headers (see README).
+     - Hostinger Business/Cloud shared hosting: use ["polling"] only because
+       incoming WebSocket connections are blocked on shared plans.
+
+     To switch to polling-only, change the line below to:
+       transports: ["polling"]
+  ── */
+  const socket = io({
+    transports: ["polling"]
+  });
+
+  const sockEl = document.getElementById("sock-status");
+
+  socket.on("connect", () => {
+    sockEl.textContent = "● Socket: connected (" + socket.id + ")";
+    sockEl.className = "connected";
+    addLog("Socket connected — transport: " + socket.io.engine.transport.name, true);
+  });
+
+  socket.on("disconnect", () => {
+    sockEl.textContent = "● Socket: disconnected";
+    sockEl.className = "disconnected";
+    addLog("Socket disconnected");
+  });
+
+  socket.on("connect_error", (err) => {
+    addLog("Connection error: " + err.message);
+  });
+
+  /* ── Log ──────────────────────────────────────────────────────────────────── */
+  const logEl = document.getElementById("log");
+
+  function addLog(msg, isEvent = false) {
+    const p = document.createElement("p");
+    if (isEvent) p.className = "ev";
+    const ts = new Date().toLocaleTimeString();
+    p.textContent = `[${ts}] ${msg}`;
+    logEl.prepend(p);
+    while (logEl.children.length > 40) logEl.removeChild(logEl.lastChild);
+  }
+
+  /* ── Camera ──────────────────────────────────────────────────────────────── */
+  const video  = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  const ctx    = canvas.getContext("2d");
+  const statusEl = document.getElementById("status");
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false
+      });
+      video.srcObject = stream;
+      await new Promise(res => video.addEventListener("loadedmetadata", res, { once: true }));
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+      addLog("Camera: " + video.videoWidth + "×" + video.videoHeight);
+    } catch (err) {
+      statusEl.textContent = "❌ Camera error: " + err.message;
+      addLog("Camera error: " + err.message);
+    }
+  }
+
+  /* ── COCO-SSD Detection ──────────────────────────────────────────────────── */
+  let model        = null;
+  let personState  = false;
+  let detecting    = false;
+
+  const CONFIDENCE_THRESHOLD = 0.55;
+  const DEBOUNCE_FRAMES      = 3;
+  let debounceCounter = 0;
+  let pendingState    = false;
+
+  async function loadModel() {
+    statusEl.textContent = "⏳  Loading COCO-SSD model…";
+    addLog("Loading COCO-SSD…");
+    model = await cocoSsd.load();
+    addLog("COCO-SSD ready");
+    await startCamera();
+    statusEl.textContent = "⬤  Scanning…";
+    scheduleDetection();
+  }
+
+  function scheduleDetection() {
+    setTimeout(runDetection, 350);
+  }
+
+  async function runDetection() {
+    if (!model || !video.readyState || video.readyState < 2) {
+      scheduleDetection();
+      return;
+    }
+    if (detecting) return;
+    detecting = true;
+
+    try {
+      const predictions = await model.detect(video);
+      const hasPerson = predictions.some(
+        p => p.class === "person" && p.score >= CONFIDENCE_THRESHOLD
+      );
+
+      drawPredictions(predictions);
+
+      if (hasPerson !== personState) {
+        if (hasPerson === pendingState) {
+          debounceCounter++;
+        } else {
+          pendingState    = hasPerson;
+          debounceCounter = 1;
+        }
+        if (debounceCounter >= DEBOUNCE_FRAMES) {
+          personState     = hasPerson;
+          debounceCounter = 0;
+          onStateChange(personState);
+        }
+      } else {
+        debounceCounter = 0;
+        pendingState    = personState;
+      }
+    } catch (err) {
+      addLog("Detection error: " + err.message);
+    }
+
+    detecting = false;
+    scheduleDetection();
+  }
+
+  function onStateChange(detected) {
+    if (detected) {
+      statusEl.textContent = "⬤  Person detected!";
+      statusEl.className   = "detected";
+      addLog("→ PERSON DETECTED — emitting camera-person-detected", true);
+      socket.emit("camera-person-detected");
+    } else {
+      statusEl.textContent = "⬤  No person detected";
+      statusEl.className   = "lost";
+      addLog("→ Person lost — emitting camera-person-lost", true);
+      socket.emit("camera-person-lost");
+    }
+  }
+
+  /* ── Canvas drawing ──────────────────────────────────────────────────────── */
+  function drawPredictions(predictions) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    predictions.forEach(pred => {
+      const [x, y, w, h] = pred.bbox;
+      const isPerson = pred.class === "person" && pred.score >= CONFIDENCE_THRESHOLD;
+      ctx.strokeStyle = isPerson ? "#00d4ff" : "#405070";
+      ctx.lineWidth   = isPerson ? 3 : 1.5;
+      ctx.strokeRect(x, y, w, h);
+      const label = `${pred.class} ${Math.round(pred.score * 100)}%`;
+      ctx.font = "bold 13px Arial";
+      const tw = ctx.measureText(label).width;
+      ctx.fillStyle = isPerson ? "#00a6ff" : "#223344";
+      ctx.fillRect(x, y - 20, tw + 8, 20);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(label, x + 4, y - 5);
+    });
+  }
+
+  /* ── Boot ─────────────────────────────────────────────────────────────────── */
+  loadModel();
+</script>
+</body>
+</html>
