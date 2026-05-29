@@ -846,54 +846,111 @@ buildGrid();
 animateEyes();
 
 /* ═══════════════════════════════════════════════════════════════
-   SOCKET.IO — Person Detection Integration (appended, no existing
-   code was modified above this line)
+   SOCKET.IO — Smart Expression Engine
    ═══════════════════════════════════════════════════════════════ */
 (function initSocketIO() {
-  // Dynamically load Socket.IO client only when served via Node server.
-  // Falls back silently if the script is opened as a plain file.
   var script = document.createElement("script");
   script.src = "/socket.io/socket.io.js";
 
   script.onload = function () {
-    var socket = io({
-      transports: ["polling"]
-    });
+    var socket = io({ transports: ["polling"] });
 
-    // Expression index constants (matches the expressions array above)
-    var EXPR_NEUTRAL = 0;
-    var EXPR_HAPPY   = 1;
+    // Expression indexes
+    var EXPR_NEUTRAL  = 0;  // Neutral
+    var EXPR_HAPPY    = 1;  // Happy
+    var EXPR_WINK_L   = 2;  // Wink Left
+    var EXPR_WINK_R   = 3;  // Wink Right
+    var EXPR_THINKING = 4;  // Thinking
 
-    /**
-     * person-detected → play Happy expression (index 1)
-     * Mirrors pressing the "2. Happy" card manually.
-     */
+    // ── PERSON PRESENT — rotate through lively expressions ──────────────────
+    // Sequence plays in order, cycles forever while person is in frame.
+    // Mix of all 5 so it never looks static or boring.
+    var HAPPY_SEQUENCE = [
+      EXPR_HAPPY,
+      EXPR_WINK_L,
+      EXPR_HAPPY,
+      EXPR_WINK_R,
+      EXPR_HAPPY,
+      EXPR_THINKING,
+      EXPR_WINK_L,
+      EXPR_HAPPY,
+      EXPR_WINK_R,
+      EXPR_THINKING
+    ];
+
+    // ── IDLE (no person) — slow calm cycle ──────────────────────────────────
+    var IDLE_SEQUENCE = [
+      EXPR_NEUTRAL,
+      EXPR_THINKING,
+      EXPR_NEUTRAL,
+      EXPR_WINK_L,
+      EXPR_NEUTRAL,
+      EXPR_THINKING,
+      EXPR_NEUTRAL,
+      EXPR_WINK_R
+    ];
+
+    var autoTimer       = null;
+    var autoIndex       = 0;
+    var currentSequence = IDLE_SEQUENCE;
+    var personPresent   = false;
+
+    // Each expression duration in ms
+    // Happy mode: faster and energetic
+    // Idle mode:  slower and calm
+    function getDuration() {
+      return personPresent ? 2200 : 4000;
+    }
+
+    function playNext() {
+      clearTimeout(autoTimer);
+      var idx = currentSequence[autoIndex % currentSequence.length];
+      playSingle(idx);
+      autoIndex++;
+      autoTimer = setTimeout(playNext, getDuration());
+    }
+
+    function switchToSequence(seq, resetIndex) {
+      currentSequence = seq;
+      if (resetIndex) autoIndex = 0;
+      clearTimeout(autoTimer);
+      // Play first expression of new sequence immediately
+      var idx = currentSequence[0];
+      playSingle(idx);
+      autoIndex = 1;
+      autoTimer = setTimeout(playNext, getDuration());
+    }
+
+    // ── Person detected → switch to lively happy sequence ───────────────────
     socket.on("person-detected", function () {
-      console.log("[Socket] person-detected → playSingle(HAPPY)");
-      playSingle(EXPR_HAPPY);
+      if (personPresent) return; // already in happy mode
+      personPresent = true;
+      console.log("[Socket] person-detected → happy sequence");
+      switchToSequence(HAPPY_SEQUENCE, true);
     });
 
-    /**
-     * person-lost → return to Neutral expression (index 0)
-     * Mirrors pressing the "1. Neutral" card manually.
-     */
+    // ── Person lost → switch back to calm idle sequence ─────────────────────
     socket.on("person-lost", function () {
-      console.log("[Socket] person-lost → playSingle(NEUTRAL)");
-      playSingle(EXPR_NEUTRAL);
+      if (!personPresent) return; // already idle
+      personPresent = false;
+      console.log("[Socket] person-lost → idle sequence");
+      switchToSequence(IDLE_SEQUENCE, true);
     });
 
     socket.on("connect", function () {
-      console.log("[Socket] index.html connected:", socket.id);
+      console.log("[Socket] connected:", socket.id);
     });
 
     socket.on("disconnect", function () {
-      console.log("[Socket] index.html disconnected");
+      console.log("[Socket] disconnected");
     });
+
+    // Start idle sequence immediately on load
+    switchToSequence(IDLE_SEQUENCE, true);
   };
 
   script.onerror = function () {
-    // Not running under Node server — no socket needed.
-    console.info("[Socket] Socket.IO not available (file:// mode). Skipping.");
+    console.info("[Socket] Socket.IO not available. Skipping.");
   };
 
   document.head.appendChild(script);
