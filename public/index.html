@@ -216,7 +216,7 @@ const emotionLines = {
   2:"Hey, wink!",
   3:"How's it going?",
   4:"Hmm, let me think…",
-  5:"wake me up!"
+  5:"Zzz… wake me up!"
 };
 
 /* Map detected face expression → emoji index
@@ -458,6 +458,15 @@ let camDetecting  = false;
 let lastExprIndex = -1;         // last expression sent to auto
 let personPresent = false;      // face visible?
 
+// 10-second timer before going to sleep when no face
+let noFaceTimer   = null;
+const NO_FACE_SLEEP_DELAY = 10000; // 10 seconds
+
+// 3-second cooldown so ESP32 isn't flooded on fast expression changes
+let esp32CooldownTimer = null;
+let esp32Locked        = false;
+const ESP32_COOLDOWN   = 3000; // 3 seconds
+
 // Debounce: expression must be stable for N consecutive frames
 const EXPR_DEBOUNCE = 4;
 let exprDebounceCount = 0;
@@ -533,6 +542,8 @@ async function runFaceDetect(){
 
       if(!personPresent){
         personPresent=true;
+        clearTimeout(noFaceTimer); // face back — cancel sleep timer
+        noFaceTimer=null;
         if(window._camSocketEmit)window._camSocketEmit(true);
         camDot.className="detected";
         camStatusTxt.textContent="⬤ Face detected";
@@ -551,7 +562,11 @@ async function runFaceDetect(){
         camDot.className="";
         camStatusTxt.textContent="⬤ No face";
         camStatusTxt.className="cam-status-text";
-        onFaceExpression(-1); // face gone → idle
+        // Wait 10s before switching to sleep
+        clearTimeout(noFaceTimer);
+        noFaceTimer=setTimeout(()=>{
+          onFaceExpression(-1); // → sleep
+        }, NO_FACE_SLEEP_DELAY);
       }
     }
   }catch(e){}
@@ -580,6 +595,13 @@ function drawFaceBox(det){
 function onFaceExpression(exprIdx){
   if(window._autoEnabled && window._autoPlayExpression){
     window._autoPlayExpression(exprIdx);
+  }
+  // Send to ESP32 via socket with 3s cooldown (avoid servo flooding)
+  if(exprIdx>=0 && !esp32Locked){
+    esp32Locked=true;
+    clearTimeout(esp32CooldownTimer);
+    if(window._esp32Emit) window._esp32Emit(exprIdx);
+    esp32CooldownTimer=setTimeout(()=>{ esp32Locked=false; }, ESP32_COOLDOWN);
   }
 }
 
@@ -701,6 +723,13 @@ async function initFallbackCam(){
 
     window._camSocketEmit=function(detected){
       socket.emit(detected?"camera-person-detected":"camera-person-lost");
+    };
+
+    // Send expression to ESP32 via server relay
+    window._esp32Emit=function(exprIdx){
+      var names=["neutral","happy","wink-left","wink-right","thinking","sleep"];
+      socket.emit("esp32-expression", { index: exprIdx, name: names[exprIdx]||"neutral" });
+      console.log("[ESP32] emit expression:", names[exprIdx]);
     };
 
     // Also respond to server-side events (from other camera sources / Raspberry)
