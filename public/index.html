@@ -7,614 +7,129 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-
-:root{
-  --ink-blue:#006dff;
-  --ink-blue-light:#00a6ff;
-  --ink-blue-dark:#003cff;
-}
-
-html,body{
-  width:100%;
-  min-height:100%;
-  background:#f7f7f4;
-  font-family:Arial, Helvetica, sans-serif;
-  color:#111;
-}
+:root{--ink-blue:#006dff;--ink-blue-light:#00a6ff;--ink-blue-dark:#003cff;}
+html,body{width:100%;min-height:100%;background:#f7f7f4;font-family:Arial,Helvetica,sans-serif;color:#111;}
 
 /* START SCREEN */
-#start-screen{
-  position:fixed;
-  inset:0;
-  background:#000;
-  z-index:9999;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:22px;
-  cursor:pointer;
-}
-
-.start-title{
-  font-size:clamp(2rem,7vw,4.8rem);
-  font-weight:900;
-  color:var(--ink-blue-light);
-  text-shadow:0 0 10px var(--ink-blue-light),0 0 30px var(--ink-blue),0 0 60px var(--ink-blue-dark);
-}
-
-.start-sub{
-  color:#9bdcff;
-  font-weight:700;
-}
-
-.start-btn{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:var(--ink-blue);
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:38px;
-  animation:ringPulse 1.5s infinite;
-}
-
-@keyframes ringPulse{
-  0%{box-shadow:0 0 0 0 rgba(0,109,255,.65)}
-  70%{box-shadow:0 0 0 28px rgba(0,109,255,0)}
-  100%{box-shadow:0 0 0 0 rgba(0,109,255,0)}
-}
+#start-screen{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;cursor:pointer;}
+.start-title{font-size:clamp(2rem,7vw,4.8rem);font-weight:900;color:var(--ink-blue-light);text-shadow:0 0 10px var(--ink-blue-light),0 0 30px var(--ink-blue),0 0 60px var(--ink-blue-dark);}
+.start-sub{color:#9bdcff;font-weight:700;}
+.start-btn{width:90px;height:90px;border-radius:50%;background:var(--ink-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:38px;animation:ringPulse 1.5s infinite;}
+@keyframes ringPulse{0%{box-shadow:0 0 0 0 rgba(0,109,255,.65)}70%{box-shadow:0 0 0 28px rgba(0,109,255,0)}100%{box-shadow:0 0 0 0 rgba(0,109,255,0)}}
 
 /* LIST PAGE */
-#list-page{
-  display:none;
-  min-height:100vh;
-  padding:22px;
-  background:#f7f7f4;
-}
+#list-page{display:none;min-height:100vh;padding:22px;background:#f7f7f4;}
+#list-page.active{display:flex;flex-direction:column;gap:16px;}
+.header{text-align:center;}
+.header h1{font-size:clamp(1.5rem,4vw,2.5rem);font-weight:900;color:#0a2a4a;}
+.header p{color:#2278b0;font-size:14px;margin-top:6px;font-weight:700;}
 
-#list-page.active{display:flex; flex-direction:column; gap:16px;}
-
-.header{
-  text-align:center;
-}
-
-.header h1{
-  font-size:clamp(1.5rem,4vw,2.5rem);
-  font-weight:900;
-  color:#0a2a4a;
-}
-
-.header p{
-  color:#2278b0;
-  font-size:14px;
-  margin-top:6px;
-  font-weight:700;
-}
-
-.toolbar{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-}
-
-.btn{
-  border:none;
-  border-radius:40px;
-  padding:9px 18px;
-  background:var(--ink-blue);
-  color:white;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow:0 0 10px rgba(0,109,255,.25);
-}
-
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;}
+.btn{border:none;border-radius:40px;padding:9px 18px;background:var(--ink-blue);color:white;font-weight:800;cursor:pointer;box-shadow:0 0 10px rgba(0,109,255,.25);}
 .btn:hover{background:var(--ink-blue-dark)}
+.btn.outline{background:white;color:var(--ink-blue);border:2px solid var(--ink-blue);}
+.count{padding:9px 16px;background:#e7f4ff;color:#1260a0;border-radius:40px;font-weight:800;border:1px solid #c7e8ff;}
 
-.btn.outline{
-  background:white;
-  color:var(--ink-blue);
-  border:2px solid var(--ink-blue);
+/* Camera toggle icon button in toolbar */
+#cam-eye-btn{
+  border:none;border-radius:40px;padding:9px 16px;
+  background:white;color:var(--ink-blue);border:2px solid var(--ink-blue);
+  font-size:18px;cursor:pointer;line-height:1;
+  box-shadow:0 0 10px rgba(0,109,255,.1);
 }
+#cam-eye-btn:hover{background:#eef8ff;}
 
-.count{
-  padding:9px 16px;
-  background:#e7f4ff;
-  color:#1260a0;
-  border-radius:40px;
-  font-weight:800;
-  border:1px solid #c7e8ff;
-}
+/* MAIN LAYOUT */
+.main-layout{display:flex;gap:22px;align-items:flex-start;max-width:1100px;margin:0 auto;width:100%;}
+.grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
 
-/* MAIN LAYOUT: grid left, camera right */
-.main-layout{
-  display:flex;
-  gap:22px;
-  align-items:flex-start;
-  max-width:1100px;
-  margin:0 auto;
-  width:100%;
-}
-
-.grid{
-  flex:1;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:18px;
-}
-
-.card{
-  min-height:160px;
-  border:2px solid rgba(0,109,255,.16);
-  border-radius:18px;
-  background:white;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  user-select:none;
-  position:relative;
-  transition:.18s;
-}
-
-.card:hover{
-  transform:translateY(-3px);
-  border-color:var(--ink-blue-light);
-  box-shadow:0 8px 22px rgba(0,109,255,.16);
-}
-
-.card.selected{
-  border-color:var(--ink-blue);
-  background:#eef8ff;
-  box-shadow:0 0 0 4px rgba(0,109,255,.12);
-}
-
-.card.selected::after{
-  content:"✓";
-  position:absolute;
-  top:9px;
-  right:12px;
-  color:var(--ink-blue);
-  font-weight:900;
-  font-size:20px;
-}
-
-.card-face{
-  width:145px;
-  height:96px;
-  position:relative;
-  overflow:visible;
-}
-
-.card-face .face-shell{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%) scale(.58);
-}
-
-.card-label{
-  font-size:14px;
-  font-weight:900;
-  margin-top:8px;
-}
+.card{min-height:160px;border:2px solid rgba(0,109,255,.16);border-radius:18px;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;user-select:none;position:relative;transition:.18s;}
+.card:hover{transform:translateY(-3px);border-color:var(--ink-blue-light);box-shadow:0 8px 22px rgba(0,109,255,.16);}
+.card.selected{border-color:var(--ink-blue);background:#eef8ff;box-shadow:0 0 0 4px rgba(0,109,255,.12);}
+.card.selected::after{content:"✓";position:absolute;top:9px;right:12px;color:var(--ink-blue);font-weight:900;font-size:20px;}
+.card-face{width:145px;height:96px;position:relative;overflow:visible;}
+.card-face .face-shell{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.58);}
+.card-label{font-size:14px;font-weight:900;margin-top:8px;}
 
 /* CAMERA PANEL */
-#camera-panel{
-  width:280px;
-  flex-shrink:0;
-  background:#0a0f1a;
-  border-radius:16px;
-  overflow:hidden;
-  border:2px solid #1a3a5c;
-  display:flex;
-  flex-direction:column;
-}
-
-.camera-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:10px 14px;
-  background:#0d1525;
-  border-bottom:1px solid #1a3a5c;
-}
-
-.camera-title{
-  color:#00a6ff;
-  font-weight:900;
-  font-size:13px;
-  letter-spacing:.04em;
-}
-
-#cam-status-dot{
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  background:#405070;
-  transition:background .3s;
-}
-
-#cam-status-dot.detected{background:#00d4ff; box-shadow:0 0 8px #00a6ff;}
-
-.camera-body{
-  position:relative;
-  background:#000;
-}
-
-#cam-video{
-  width:100%;
-  display:block;
-}
-
-#cam-canvas{
-  position:absolute;
-  top:0;left:0;
-  width:100%;
-  height:100%;
-  pointer-events:none;
-}
-
-/* Hidden state: show placeholder */
-#cam-hidden-overlay{
-  display:none;
-  background:#0d1525;
-  width:100%;
-  height:157px;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  gap:8px;
-}
-
-#cam-hidden-overlay.active{display:flex;}
-
-.cam-hidden-icon{font-size:36px; opacity:.5;}
-.cam-hidden-text{color:#405070; font-size:12px; font-weight:700;}
-
-.camera-footer{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:8px 12px;
-  background:#0d1525;
-  border-top:1px solid #1a3a5c;
-  gap:8px;
-}
-
-.cam-status-text{
-  color:#405070;
-  font-size:11px;
-  font-weight:700;
-  flex:1;
-}
-
+#camera-panel{width:280px;flex-shrink:0;background:#0a0f1a;border-radius:16px;overflow:hidden;border:2px solid #1a3a5c;display:flex;flex-direction:column;transition:opacity .3s;}
+#camera-panel.panel-hidden{display:none;}
+.camera-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#0d1525;border-bottom:1px solid #1a3a5c;}
+.camera-title{color:#00a6ff;font-weight:900;font-size:13px;letter-spacing:.04em;}
+#cam-status-dot{width:10px;height:10px;border-radius:50%;background:#405070;transition:background .3s;}
+#cam-status-dot.detected{background:#00d4ff;box-shadow:0 0 8px #00a6ff;}
+.camera-body{position:relative;background:#000;}
+#cam-video{width:100%;display:block;}
+#cam-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.camera-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0d1525;border-top:1px solid #1a3a5c;gap:8px;}
+.cam-status-text{color:#405070;font-size:11px;font-weight:700;flex:1;}
 .cam-status-text.detected{color:#00d4ff;}
-
-#cam-toggle-btn{
-  padding:6px 14px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:900;
-  border:none;
-  cursor:pointer;
-  background:#ff3355;
-  color:#fff;
-  white-space:nowrap;
+/* expression badge */
+#cam-expr-badge{
+  padding:3px 10px;border-radius:999px;font-size:11px;font-weight:900;
+  background:#1a2a4a;color:#607090;border:1px solid #223;
+  white-space:nowrap;transition:background .3s,color .3s;
 }
-
-#cam-toggle-btn.hidden-state{
-  background:#00d48a;
-}
+#cam-expr-badge.active{background:#003cff22;color:#00d4ff;border-color:#00a6ff;}
 
 /* ANIMATION PAGE */
-#anim-page{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:#f7f7f4;
-  z-index:1000;
-  overflow:hidden;
-}
-
+#anim-page{display:none;position:fixed;inset:0;background:#f7f7f4;z-index:1000;overflow:hidden;}
 #anim-page.active{display:block}
+.anim-back-btn{position:absolute;top:12px;left:16px;z-index:20;border:2px solid var(--ink-blue);background:#fff;color:var(--ink-blue);padding:8px 16px;border-radius:999px;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(0,109,255,.18);}
+.anim-back-btn:hover{background:var(--ink-blue);color:#fff;}
 
-.anim-back-btn{
-  position:absolute;
-  top:12px;
-  left:16px;
-  z-index:20;
-  border:2px solid var(--ink-blue);
-  background:#fff;
-  color:var(--ink-blue);
-  padding:8px 16px;
-  border-radius:999px;
-  font-weight:900;
-  font-size:14px;
-  cursor:pointer;
-  box-shadow:0 4px 14px rgba(0,109,255,.18);
-}
-
-.anim-back-btn:hover{
-  background:var(--ink-blue);
-  color:#fff;
-}
-
-/* Emotion text — shown briefly when emoji starts, then fades */
 #anim-emotion-text{
-  position:absolute;
-  bottom:40px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:10;
-  font-size:clamp(1rem,3vw,1.5rem);
-  font-weight:900;
-  color:#0a2a4a;
-  background:rgba(255,255,255,0.88);
-  padding:10px 28px;
-  border-radius:999px;
-  box-shadow:0 4px 18px rgba(0,109,255,.12);
-  opacity:0;
-  transition:opacity .4s;
-  white-space:nowrap;
-  pointer-events:none;
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);z-index:10;
+  font-size:clamp(1rem,3vw,1.5rem);font-weight:900;color:#0a2a4a;
+  background:rgba(255,255,255,0.88);padding:10px 28px;border-radius:999px;
+  box-shadow:0 4px 18px rgba(0,109,255,.12);opacity:0;transition:opacity .4s;
+  white-space:nowrap;pointer-events:none;
 }
-
 #anim-emotion-text.visible{opacity:1;}
 
-.anim-progress{
-  position:absolute;
-  bottom:0;
-  left:0;
-  height:5px;
-  background:var(--ink-blue-light);
-  box-shadow:0 0 12px var(--ink-blue-light);
-  width:0%;
-  z-index:5;
-}
-
-#anim-stage{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.stage-face{
-  width:250px;
-  height:135px;
-  position:relative;
-  transform:scale(3.2);
-}
-
-.stage-face .face-shell{
-  position:absolute;
-  left:0;
-  top:0;
-}
+.anim-progress{position:absolute;bottom:0;left:0;height:5px;background:var(--ink-blue-light);box-shadow:0 0 12px var(--ink-blue-light);width:0%;z-index:5;}
+#anim-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.stage-face{width:250px;height:135px;position:relative;transform:scale(3.2);}
+.stage-face .face-shell{position:absolute;left:0;top:0;}
 
 /* FACE */
-.face-shell{
-  width:250px;
-  height:135px;
-}
+.face-shell{width:250px;height:135px;}
+.face{width:250px;height:135px;position:relative;animation:floatFace 3s ease-in-out infinite;}
+@keyframes floatFace{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 
-.face{
-  width:250px;
-  height:135px;
-  position:relative;
-  animation:floatFace 3s ease-in-out infinite;
-}
+.brow{position:absolute;width:54px;height:28px;top:0;background:transparent;border-top:10px solid #f1f1f1;border-radius:80px 80px 0 0;filter:drop-shadow(0 3px 3px rgba(0,0,0,.24)) drop-shadow(0 -1px 1px rgba(255,255,255,.95));animation:browMove 2.4s ease-in-out infinite;}
+.brow::before,.brow::after{display:none;}
+@keyframes browMove{0%,100%{top:0}50%{top:-5px}}
+.brow.left{left:42px;transform:rotate(-20deg);}
+.brow.right{right:42px;transform:rotate(20deg);}
 
-@keyframes floatFace{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-5px)}
-}
+.eye{position:absolute;top:30px;width:68px;height:68px;border-radius:50%;border:4px solid #060606;background:#050505;overflow:hidden;box-shadow:8px 2px 0 #000,inset 0 -9px 0 var(--ink-blue),0 5px 10px rgba(0,0,0,.24);transform-origin:center;animation:blink var(--blink-time,4s) infinite;animation-delay:var(--blink-delay,0s);}
+.eye.left{left:34px}.eye.right{right:34px}
+@keyframes blink{0%,88%,100%{transform:scaleY(1)}92%{transform:scaleY(.08)}95%{transform:scaleY(1)}}
+.iris{position:absolute;inset:6px;border-radius:50%;background:radial-gradient(circle at 68% 25%,#fff 0 16%,transparent 17%),radial-gradient(circle at 35% 55%,#fff 0 7%,transparent 8%),radial-gradient(circle at 50% 45%,#050505 0 55%,transparent 56%),radial-gradient(circle at 50% 92%,var(--ink-blue-light) 0 24%,var(--ink-blue) 42%,transparent 44%);transform:translate(var(--look-x,0px),var(--look-y,0px));transition:.08s linear;}
+.eye::before{content:"";position:absolute;width:16px;height:16px;background:#000;border-radius:50%;top:27px;z-index:5;}
+.eye.left::before{left:-15px}.eye.right::before{right:-15px}
 
-/* NILA / CRESCENT EYEBROWS */
-.brow{
-  position:absolute;
-  width:54px;
-  height:28px;
-  top:0;
-  background:transparent;
-  border-top:10px solid #f1f1f1;
-  border-radius:80px 80px 0 0;
-  filter:
-    drop-shadow(0 3px 3px rgba(0,0,0,.24))
-    drop-shadow(0 -1px 1px rgba(255,255,255,.95));
-  animation:browMove 2.4s ease-in-out infinite;
-}
+.wink-eye{position:absolute;top:58px;width:68px;height:28px;border-top:8px solid #111;border-radius:70px 70px 0 0;animation:winkAnim 1.5s ease-in-out infinite;}
+.wink-eye.left{left:34px}.wink-eye.right{right:34px}
+@keyframes winkAnim{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.65)}}
 
-.brow::before,
-.brow::after{
-  display:none;
-}
+.mouth{position:absolute;left:50%;transform:translateX(-50%);}
+.smile{bottom:-3px;width:34px;height:18px;border-bottom:5px solid #111;border-radius:0 0 50px 50px;animation:smileAnim 1.5s ease-in-out infinite;}
+@keyframes smileAnim{0%,100%{width:34px;height:18px}50%{width:42px;height:24px}}
+.open{bottom:-6px;width:32px;height:24px;background:#111;border-radius:0 0 45px 45px;animation:openAnim 1.2s ease-in-out infinite;}
+.open::after{content:"";position:absolute;width:24px;height:7px;left:4px;top:0;background:var(--ink-blue-light);border-radius:0 0 20px 20px;}
+@keyframes openAnim{0%,100%{height:24px}50%{height:31px}}
+.wavy{bottom:-3px;width:34px;height:14px;border-bottom:5px dotted #111;animation:wavyAnim .8s ease-in-out infinite;}
+@keyframes wavyAnim{0%,100%{transform:translateX(-50%) rotate(0)}25%{transform:translateX(-50%) rotate(4deg)}75%{transform:translateX(-50%) rotate(-4deg)}}
+.think-mark{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:34px;font-weight:900;color:#111;animation:thinkBounce 1.2s ease-in-out infinite;}
+@keyframes thinkBounce{0%,100%{top:-9px}50%{top:-18px}}
 
-@keyframes browMove{
-  0%,100%{top:0}
-  50%{top:-5px}
-}
-
-.brow.left{
-  left:42px;
-  transform:rotate(-20deg);
-}
-
-.brow.right{
-  right:42px;
-  transform:rotate(20deg);
-}
-
-/* EYES */
-.eye{
-  position:absolute;
-  top:30px;
-  width:68px;
-  height:68px;
-  border-radius:50%;
-  border:4px solid #060606;
-  background:#050505;
-  overflow:hidden;
-  box-shadow:8px 2px 0 #000,inset 0 -9px 0 var(--ink-blue),0 5px 10px rgba(0,0,0,.24);
-  transform-origin:center;
-  animation:blink var(--blink-time,4s) infinite;
-  animation-delay:var(--blink-delay,0s);
-}
-
-.eye.left{left:34px}
-.eye.right{right:34px}
-
-@keyframes blink{
-  0%,88%,100%{transform:scaleY(1)}
-  92%{transform:scaleY(.08)}
-  95%{transform:scaleY(1)}
-}
-
-.iris{
-  position:absolute;
-  inset:6px;
-  border-radius:50%;
-  background:
-    radial-gradient(circle at 68% 25%, #fff 0 16%, transparent 17%),
-    radial-gradient(circle at 35% 55%, #fff 0 7%, transparent 8%),
-    radial-gradient(circle at 50% 45%, #050505 0 55%, transparent 56%),
-    radial-gradient(circle at 50% 92%, var(--ink-blue-light) 0 24%, var(--ink-blue) 42%, transparent 44%);
-  transform:translate(var(--look-x,0px),var(--look-y,0px));
-  transition:.08s linear;
-}
-
-.eye::before{
-  content:"";
-  position:absolute;
-  width:16px;
-  height:16px;
-  background:#000;
-  border-radius:50%;
-  top:27px;
-  z-index:5;
-}
-
-.eye.left::before{left:-15px}
-.eye.right::before{right:-15px}
-
-/* WINK */
-.wink-eye{
-  position:absolute;
-  top:58px;
-  width:68px;
-  height:28px;
-  border-top:8px solid #111;
-  border-radius:70px 70px 0 0;
-  animation:winkAnim 1.5s ease-in-out infinite;
-}
-
-.wink-eye.left{left:34px}
-.wink-eye.right{right:34px}
-
-@keyframes winkAnim{
-  0%,100%{transform:scaleY(1)}
-  50%{transform:scaleY(.65)}
-}
-
-/* MOUTHS */
-.mouth{
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-.smile{
-  bottom:-3px;
-  width:34px;
-  height:18px;
-  border-bottom:5px solid #111;
-  border-radius:0 0 50px 50px;
-  animation:smileAnim 1.5s ease-in-out infinite;
-}
-
-@keyframes smileAnim{
-  0%,100%{width:34px;height:18px}
-  50%{width:42px;height:24px}
-}
-
-.open{
-  bottom:-6px;
-  width:32px;
-  height:24px;
-  background:#111;
-  border-radius:0 0 45px 45px;
-  animation:openAnim 1.2s ease-in-out infinite;
-}
-
-.open::after{
-  content:"";
-  position:absolute;
-  width:24px;
-  height:7px;
-  left:4px;
-  top:0;
-  background:var(--ink-blue-light);
-  border-radius:0 0 20px 20px;
-}
-
-@keyframes openAnim{
-  0%,100%{height:24px}
-  50%{height:31px}
-}
-
-.wavy{
-  bottom:-3px;
-  width:34px;
-  height:14px;
-  border-bottom:5px dotted #111;
-  animation:wavyAnim .8s ease-in-out infinite;
-}
-
-@keyframes wavyAnim{
-  0%,100%{transform:translateX(-50%) rotate(0)}
-  25%{transform:translateX(-50%) rotate(4deg)}
-  75%{transform:translateX(-50%) rotate(-4deg)}
-}
-
-.think-mark{
-  position:absolute;
-  top:-9px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:34px;
-  font-weight:900;
-  color:#111;
-  animation:thinkBounce 1.2s ease-in-out infinite;
-}
-
-@keyframes thinkBounce{
-  0%,100%{top:-9px}
-  50%{top:-18px}
-}
-
-@media(max-width:900px){
-  .main-layout{flex-direction:column;}
-  #camera-panel{width:100%;}
-  .grid{grid-template-columns:repeat(3,1fr)}
-}
-
-@media(max-width:620px){
-  .grid{grid-template-columns:repeat(2,1fr)}
-}
-
-@media(max-width:520px){
-  .stage-face{transform:scale(2.1)}
-}
+@media(max-width:900px){.main-layout{flex-direction:column;}#camera-panel{width:100%;}.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:620px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.stage-face{transform:scale(2.1)}}
 </style>
 </head>
-
 <body>
 
 <div id="start-screen">
@@ -635,142 +150,134 @@ html,body{
     <span class="count" id="sel-count">0 selected</span>
     <button class="btn" id="play-selected" onclick="playSelected()" style="display:none;">▶ Play Loop</button>
     <button class="btn" id="auto-btn" onclick="toggleAuto()">🤖 Auto: ON</button>
+    <!-- Camera eye toggle — sits next to fullscreen -->
+    <button id="cam-eye-btn" title="Toggle camera panel" onclick="toggleCameraPanel()">👁</button>
     <button class="btn outline" onclick="toggleFullscreen()">⛶ Fullscreen</button>
   </div>
 
   <div class="main-layout">
-    <!-- Expression grid -->
     <div class="grid" id="grid"></div>
 
-    <!-- Inline camera panel -->
+    <!-- Inline camera panel (hidden via panel-hidden class) -->
     <div id="camera-panel">
       <div class="camera-header">
-        <span class="camera-title">📷 CAMERA DETECTION</span>
+        <span class="camera-title">📷 FACE DETECTION</span>
         <span id="cam-status-dot"></span>
       </div>
-
       <div class="camera-body">
-        <!-- Live video (shown when camera is visible) -->
-        <video id="cam-video" autoplay muted playsinline style="display:block;"></video>
+        <video id="cam-video" autoplay muted playsinline></video>
         <canvas id="cam-canvas"></canvas>
-        <!-- Placeholder shown when camera is hidden -->
-        <div id="cam-hidden-overlay">
-          <div class="cam-hidden-icon">🙈</div>
-          <div class="cam-hidden-text">Camera hidden · still detecting</div>
-        </div>
       </div>
-
       <div class="camera-footer">
-        <span class="cam-status-text" id="cam-status-text">Waiting for model…</span>
-        <button id="cam-toggle-btn" onclick="toggleCameraVisibility()">Hide Cam</button>
+        <span class="cam-status-text" id="cam-status-text">Loading…</span>
+        <span id="cam-expr-badge">—</span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ANIMATION PAGE (full screen emoji) -->
+<!-- ANIMATION PAGE -->
 <div id="anim-page">
-  <button class="anim-back-btn" type="button" onclick="event.stopPropagation(); stopPlayer();">← Back</button>
+  <button class="anim-back-btn" type="button" onclick="event.stopPropagation();stopPlayer();">← Back</button>
   <div id="anim-stage"></div>
-  <!-- Emotion text shown briefly on each expression change -->
   <div id="anim-emotion-text"></div>
   <div class="anim-progress" id="anim-bar"></div>
 </div>
 
-<!-- TensorFlow.js + COCO-SSD for in-page detection -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<!-- face-api.js for expression detection -->
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <script>
-/* ═══ EXPRESSIONS ══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   EXPRESSIONS
+   Index: 0=Neutral  1=Happy  2=WinkLeft  3=WinkRight  4=Thinking
+═══════════════════════════════════════════════════════════════════════════ */
 const expressions = [
-  ["Neutral",  "normal","smile"],
-  ["Happy",    "normal","open"],
-  ["Wink Left","winkL", "smile"],
-  ["Wink Right","winkR","open"],
-  ["Thinking", "normal","wavy","think"]
+  ["Neutral",   "normal","smile"],
+  ["Happy",     "normal","open"],
+  ["Wink Left", "winkL", "smile"],
+  ["Wink Right","winkR", "open"],
+  ["Thinking",  "normal","wavy","think"]
 ];
 
-// Short friendly lines shown while each emoji plays
 const emotionLines = {
-  0: "Hello there!",
-  1: "Happy to see you!",
-  2: "Hey, wink!",
-  3: "How's it going?",
-  4: "Hmm, let me think…"
+  0:"Hello there!",
+  1:"Happy to see you!",
+  2:"Hey, wink!",
+  3:"How's it going?",
+  4:"Hmm, let me think…"
 };
 
+/* Map detected face expression → emoji index
+   face-api expressions: neutral, happy, sad, angry, fearful, disgusted, surprised */
+function exprToIndex(faceExpr){
+  switch(faceExpr){
+    case "happy":     return 1; // Happy
+    case "surprised": return 2; // Wink Left (excited/surprised)
+    case "sad":       return 3; // Wink Right (sympathetic)
+    case "angry":
+    case "disgusted":
+    case "fearful":   return 4; // Thinking (negative → robot ponders)
+    case "neutral":
+    default:          return 0; // Neutral
+  }
+}
+
+/* ═══ GRID & PLAYER STATE ══════════════════════════════════════════════════ */
 const grid = document.getElementById("grid");
-let selected = new Set();
-let audioCtx = null;
-let playQueue = [];
-let playIndex = 0;
-let playTimer = null;
-let isPlaying = false;
+let selected   = new Set();
+let audioCtx   = null;
+let playQueue  = [];
+let playIndex  = 0;
+let playTimer  = null;
+let isPlaying  = false;
 
 /* ═══ FACE HTML HELPERS ════════════════════════════════════════════════════ */
-function eye(side, type){
-  if(type==="winkL" && side==="left") return `<span class="wink-eye left"></span>`;
-  if(type==="winkR" && side==="right") return `<span class="wink-eye right"></span>`;
+function eyeHTML(side,type){
+  if(type==="winkL"&&side==="left") return `<span class="wink-eye left"></span>`;
+  if(type==="winkR"&&side==="right") return `<span class="wink-eye right"></span>`;
   return `<span class="eye ${side}"><span class="iris"></span></span>`;
 }
-
-function faceHTML(exp, index){
-  const [name, type, mouthType, fx] = exp;
-  const blinkTime  = 3.2 + (index % 5) * .3;
-  const blinkDelay = (index % 7) * .2;
-  const mouthHTML  = mouthType === "smile" ? `<span class="mouth smile"></span>`
-                   : mouthType === "open"  ? `<span class="mouth open"></span>`
-                   : mouthType === "wavy"  ? `<span class="mouth wavy"></span>` : "";
-  const fxHTML     = fx === "think" ? `<span class="think-mark">?</span>` : "";
-  return `
-    <div class="face-shell">
-      <div class="face" style="--blink-time:${blinkTime}s;--blink-delay:${blinkDelay}s;">
-        <span class="brow left"></span>
-        <span class="brow right"></span>
-        ${eye("left",type)}${eye("right",type)}
-        ${mouthHTML}${fxHTML}
-      </div>
-    </div>`;
+function faceHTML(exp,index){
+  const [,type,mouthType,fx]=exp;
+  const bt=3.2+(index%5)*.3, bd=(index%7)*.2;
+  const m=mouthType==="smile"?`<span class="mouth smile"></span>`
+         :mouthType==="open" ?`<span class="mouth open"></span>`
+         :mouthType==="wavy" ?`<span class="mouth wavy"></span>`:"";
+  const f=fx==="think"?`<span class="think-mark">?</span>`:"";
+  return `<div class="face-shell"><div class="face" style="--blink-time:${bt}s;--blink-delay:${bd}s;">
+    <span class="brow left"></span><span class="brow right"></span>
+    ${eyeHTML("left",type)}${eyeHTML("right",type)}${m}${f}
+  </div></div>`;
 }
 
-/* ═══ GRID ══════════════════════════════════════════════════════════════════ */
+/* ═══ GRID BUILD ═══════════════════════════════════════════════════════════ */
 function buildGrid(){
-  grid.innerHTML = expressions.map((exp,i)=>`
+  grid.innerHTML=expressions.map((exp,i)=>`
     <div class="card" data-index="${i}">
       <div class="card-face">${faceHTML(exp,i)}</div>
       <div class="card-label">${exp[0]}</div>
     </div>`).join("");
-
   document.querySelectorAll(".card").forEach(card=>{
-    const index = Number(card.dataset.index);
-    let pressTimer = null, longPressed = false;
-
-    card.addEventListener("pointerdown",()=>{
-      longPressed = false;
-      pressTimer = setTimeout(()=>{ longPressed=true; toggleSelect(index); },500);
-    });
-    card.addEventListener("pointerup",()=>{
-      clearTimeout(pressTimer);
-      if(longPressed) return;
-      selected.size > 0 ? toggleSelect(index) : playSingle(index);
-    });
-    card.addEventListener("pointerleave",()=>clearTimeout(pressTimer));
+    const idx=Number(card.dataset.index);
+    let pt=null,lp=false;
+    card.addEventListener("pointerdown",()=>{lp=false;pt=setTimeout(()=>{lp=true;toggleSelect(idx);},500);});
+    card.addEventListener("pointerup",()=>{clearTimeout(pt);if(lp)return;selected.size>0?toggleSelect(idx):playSingle(idx);});
+    card.addEventListener("pointerleave",()=>clearTimeout(pt));
   });
 }
-
-function toggleSelect(index){ selected.has(index)?selected.delete(index):selected.add(index); refreshSelection(); }
-function refreshSelection(){
+function toggleSelect(i){selected.has(i)?selected.delete(i):selected.add(i);refreshSel();}
+function refreshSel(){
   document.querySelectorAll(".card").forEach(c=>c.classList.toggle("selected",selected.has(Number(c.dataset.index))));
-  document.getElementById("sel-count").textContent = selected.size+" selected";
-  document.getElementById("play-selected").style.display = selected.size?"inline-block":"none";
+  document.getElementById("sel-count").textContent=selected.size+" selected";
+  document.getElementById("play-selected").style.display=selected.size?"inline-block":"none";
 }
-function selectAll(){ selected=new Set(expressions.map((_,i)=>i)); refreshSelection(); }
-function clearSelection(){ selected.clear(); refreshSelection(); }
+function selectAll(){selected=new Set(expressions.map((_,i)=>i));refreshSel();}
+function clearSelection(){selected.clear();refreshSel();}
 
 /* ═══ PLAYER ════════════════════════════════════════════════════════════════ */
-function playSingle(index){ playQueue=[index]; playIndex=0; startPlayer(); }
-function playSelected(){ if(!selected.size) return; playQueue=[...selected]; playIndex=0; startPlayer(); }
+function playSingle(idx){playQueue=[idx];playIndex=0;startPlayer();}
+function playSelected(){if(!selected.size)return;playQueue=[...selected];playIndex=0;startPlayer();}
 
 function startPlayer(){
   isPlaying=true;
@@ -779,110 +286,110 @@ function startPlayer(){
   showFrame();
 }
 
-let emotionHideTimer = null;
+let emotionHideTimer=null;
 
 function showFrame(){
   clearTimeout(playTimer);
+  const idx=playQueue[playIndex];
+  const exp=expressions[idx];
+  const dur=2600;
 
-  const index   = playQueue[playIndex];
-  const exp     = expressions[index];
-  const duration= 2600;
+  document.getElementById("anim-stage").innerHTML=`<div class="stage-face">${faceHTML(exp,idx)}</div>`;
 
-  // Render emoji — NO counter text
-  document.getElementById("anim-stage").innerHTML =
-    `<div class="stage-face">${faceHTML(exp,index)}</div>`;
-
-  // Show emotion line briefly (1.4s), then fade
-  const textEl = document.getElementById("anim-emotion-text");
+  // Emotion text + TTS
+  const txt=emotionLines[idx]||exp[0];
+  const textEl=document.getElementById("anim-emotion-text");
   clearTimeout(emotionHideTimer);
-  textEl.textContent = emotionLines[index] || exp[0];
+  textEl.textContent=txt;
   textEl.classList.add("visible");
-  emotionHideTimer = setTimeout(()=>textEl.classList.remove("visible"), 1400);
+  emotionHideTimer=setTimeout(()=>textEl.classList.remove("visible"),1600);
 
-  playTone();
+  speakText(txt);   // TTS speak
+  playTone();       // tone
 
-  const bar = document.getElementById("anim-bar");
-  bar.style.transition="none"; bar.style.width="0%";
+  const bar=document.getElementById("anim-bar");
+  bar.style.transition="none";bar.style.width="0%";
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    bar.style.transition=`width ${duration}ms linear`; bar.style.width="100%";
+    bar.style.transition=`width ${dur}ms linear`;bar.style.width="100%";
   }));
 
-  playTimer = setTimeout(()=>{
-    if(!isPlaying) return;
-    playIndex = (playIndex+1) % playQueue.length;
+  playTimer=setTimeout(()=>{
+    if(!isPlaying)return;
+    playIndex=(playIndex+1)%playQueue.length;
     showFrame();
-  }, duration);
+  },dur);
 }
 
 function stopPlayer(){
   isPlaying=false;
-  clearTimeout(playTimer);
-  clearTimeout(emotionHideTimer);
-  if(window.speechSynthesis) speechSynthesis.cancel();
+  clearTimeout(playTimer);clearTimeout(emotionHideTimer);
+  if(window.speechSynthesis)speechSynthesis.cancel();
   const bar=document.getElementById("anim-bar");
-  bar.style.transition="none"; bar.style.width="0%";
+  bar.style.transition="none";bar.style.width="0%";
   document.getElementById("anim-emotion-text").classList.remove("visible");
   document.getElementById("anim-page").classList.remove("active");
   document.getElementById("list-page").classList.add("active");
 }
 
-document.getElementById("anim-page").addEventListener("click", stopPlayer);
+document.getElementById("anim-page").addEventListener("click",stopPlayer);
 document.addEventListener("keydown",e=>{
   if(document.getElementById("anim-page").classList.contains("active")){
-    if(e.key==="Escape"||e.key===" "){ e.preventDefault(); stopPlayer(); }
+    if(e.key==="Escape"||e.key===" "){e.preventDefault();stopPlayer();}
   }
 });
-
 function toggleFullscreen(){
-  if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});
   else document.exitFullscreen().catch(()=>{});
 }
 
-/* ═══ AUDIO ════════════════════════════════════════════════════════════════ */
+/* ═══ AUDIO / TTS ══════════════════════════════════════════════════════════ */
 function unlock(){
-  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==="suspended") audioCtx.resume();
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended")audioCtx.resume();
   document.getElementById("start-screen").style.display="none";
   document.getElementById("list-page").classList.add("active");
-  // Start camera after unlock
-  initCamera();
+  initFaceCamera();
 }
-
-document.getElementById("start-screen").addEventListener("click", unlock);
-document.getElementById("start-screen").addEventListener("touchend",e=>{ e.preventDefault(); unlock(); },{passive:false});
+document.getElementById("start-screen").addEventListener("click",unlock);
+document.getElementById("start-screen").addEventListener("touchend",e=>{e.preventDefault();unlock();},{passive:false});
 
 function playTone(){
-  if(!audioCtx) return;
+  if(!audioCtx)return;
   const now=audioCtx.currentTime;
   [523,659,784].forEach((freq,i)=>{
-    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
+    const osc=audioCtx.createOscillator(),g=audioCtx.createGain();
+    osc.connect(g);g.connect(audioCtx.destination);
     osc.type="sine";
     osc.frequency.setValueAtTime(freq,now+i*.12);
-    gain.gain.setValueAtTime(0.18,now+i*.12);
-    gain.gain.exponentialRampToValueAtTime(0.001,now+i*.12+.12);
-    osc.start(now+i*.12); osc.stop(now+i*.12+.13);
+    g.gain.setValueAtTime(0.18,now+i*.12);
+    g.gain.exponentialRampToValueAtTime(0.001,now+i*.12+.12);
+    osc.start(now+i*.12);osc.stop(now+i*.12+.13);
   });
 }
 
-/* ═══ EYE FOLLOW ═══════════════════════════════════════════════════════════ */
-let pointer={x:innerWidth/2,y:innerHeight/2,active:false,last:0};
-function updatePointer(x,y){ pointer.x=x; pointer.y=y; pointer.active=true; pointer.last=performance.now(); }
-window.addEventListener("mousemove",e=>updatePointer(e.clientX,e.clientY));
-window.addEventListener("touchmove",e=>{ if(e.touches.length) updatePointer(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+function speakText(text){
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=0.95;u.pitch=1.05;u.volume=0.9;
+  // Small delay so audio context doesn't block it
+  setTimeout(()=>speechSynthesis.speak(u),120);
+}
 
-function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+/* ═══ EYE FOLLOW ═══════════════════════════════════════════════════════════ */
+let ptr={x:innerWidth/2,y:innerHeight/2,active:false,last:0};
+function updPtr(x,y){ptr.x=x;ptr.y=y;ptr.active=true;ptr.last=performance.now();}
+window.addEventListener("mousemove",e=>updPtr(e.clientX,e.clientY));
+window.addEventListener("touchmove",e=>{if(e.touches.length)updPtr(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function animateEyes(){
   const now=performance.now();
   document.querySelectorAll(".face").forEach((face,i)=>{
-    const rect=face.getBoundingClientRect();
-    const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    const r=face.getBoundingClientRect();
+    const cx=r.left+r.width/2,cy=r.top+r.height/2;
     let x,y;
-    if(pointer.active&&now-pointer.last<2500){
-      x=clamp((pointer.x-cx)/45,-6,6); y=clamp((pointer.y-cy)/60,-4,4);
-    }else{
-      x=Math.sin(now/900+i*.5)*4; y=Math.cos(now/1000+i*.4)*3;
-    }
+    if(ptr.active&&now-ptr.last<2500){x=clamp((ptr.x-cx)/45,-6,6);y=clamp((ptr.y-cy)/60,-4,4);}
+    else{x=Math.sin(now/900+i*.5)*4;y=Math.cos(now/1000+i*.4)*3;}
     face.style.setProperty("--look-x",x+"px");
     face.style.setProperty("--look-y",y+"px");
   });
@@ -890,209 +397,331 @@ function animateEyes(){
 }
 
 /* ═══ AUTO MODE ════════════════════════════════════════════════════════════ */
-window._autoEnabled = true;
-
+window._autoEnabled=true;
 function toggleAuto(){
-  window._autoEnabled = !window._autoEnabled;
+  window._autoEnabled=!window._autoEnabled;
   const btn=document.getElementById("auto-btn");
   if(window._autoEnabled){
-    btn.textContent="🤖 Auto: ON"; btn.classList.remove("outline");
+    btn.textContent="🤖 Auto: ON";btn.classList.remove("outline");
+    // Restart auto immediately when turned back ON
+    if(window._restartAutoSequence)window._restartAutoSequence();
   }else{
-    btn.textContent="🤖 Auto: OFF"; btn.classList.add("outline");
-    if(window._stopAutoSequence) window._stopAutoSequence();
+    btn.textContent="🤖 Auto: OFF";btn.classList.add("outline");
+    if(window._stopAutoSequence)window._stopAutoSequence();
   }
 }
 
-/* ═══ CAMERA — inline detection ════════════════════════════════════════════ */
-let camModel      = null;
-let camPersonState= false;
+/* ═══ CAMERA PANEL TOGGLE (eye button) ════════════════════════════════════ */
+let camPanelVisible=true;
+function toggleCameraPanel(){
+  camPanelVisible=!camPanelVisible;
+  const panel=document.getElementById("camera-panel");
+  const btn=document.getElementById("cam-eye-btn");
+  if(camPanelVisible){
+    panel.classList.remove("panel-hidden");
+    btn.title="Hide camera panel";
+    btn.style.opacity="1";
+  }else{
+    panel.classList.add("panel-hidden");
+    btn.title="Show camera panel";
+    btn.style.opacity="0.5";
+  }
+  // Detection always keeps running — socket events still fire
+}
+
+/* ═══ FACE-API CAMERA + EXPRESSION DETECTION ══════════════════════════════ */
+const camVideo    = document.getElementById("cam-video");
+const camCanvas   = document.getElementById("cam-canvas");
+const camCtx      = camCanvas.getContext("2d");
+const camStatusTxt= document.getElementById("cam-status-text");
+const camDot      = document.getElementById("cam-status-dot");
+const camExprBadge= document.getElementById("cam-expr-badge");
+
+let faceApiReady  = false;
 let camDetecting  = false;
-let camVisible    = true;
-let camStream     = null;
+let lastExprIndex = -1;         // last expression sent to auto
+let personPresent = false;      // face visible?
 
-const CONFIDENCE = 0.55;
-const DEBOUNCE_N = 3;
-let debounceCount = 0, pendingState = false;
+// Debounce: expression must be stable for N consecutive frames
+const EXPR_DEBOUNCE = 4;
+let exprDebounceCount = 0;
+let pendingExprIndex  = -1;
 
-const camVideo   = document.getElementById("cam-video");
-const camCanvas  = document.getElementById("cam-canvas");
-const camCtx     = camCanvas.getContext("2d");
-const camStatusTxt = document.getElementById("cam-status-text");
-const camDot     = document.getElementById("cam-status-dot");
-
-async function initCamera(){
-  camStatusTxt.textContent = "Loading model…";
-  try {
-    camModel = await cocoSsd.load();
-  } catch(e){
-    camStatusTxt.textContent = "Model failed"; return;
+async function initFaceCamera(){
+  camStatusTxt.textContent="Loading face model…";
+  try{
+    // Load tiny face detector + expression net from CDN
+    const MODEL_URL="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model";
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+    faceApiReady=true;
+    camStatusTxt.textContent="Starting camera…";
+  }catch(e){
+    // fallback: person detection only via COCO-SSD
+    camStatusTxt.textContent="Face model failed — using person detect";
+    initFallbackCam();
+    return;
   }
-  try {
-    camStream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:"user", width:{ideal:640}, height:{ideal:480} }, audio:false
-    });
-    camVideo.srcObject = camStream;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false});
+    camVideo.srcObject=stream;
     await new Promise(res=>camVideo.addEventListener("loadedmetadata",res,{once:true}));
-    camCanvas.width  = camVideo.videoWidth;
-    camCanvas.height = camVideo.videoHeight;
-    camStatusTxt.textContent = "Scanning…";
-  } catch(e){
-    camStatusTxt.textContent = "No camera"; return;
+    camCanvas.width=camVideo.videoWidth;
+    camCanvas.height=camVideo.videoHeight;
+    camStatusTxt.textContent="Scanning face…";
+  }catch(e){
+    camStatusTxt.textContent="No camera";return;
   }
-  scheduleCamDetection();
+  scheduleFaceDetect();
 }
 
-function scheduleCamDetection(){ setTimeout(runCamDetection, 350); }
+function scheduleFaceDetect(){setTimeout(runFaceDetect,300);}
 
-async function runCamDetection(){
-  if(!camModel||!camVideo.readyState||camVideo.readyState<2){ scheduleCamDetection(); return; }
-  if(camDetecting) return;
-  camDetecting = true;
-  try {
-    const preds = await camModel.detect(camVideo);
-    const hasPerson = preds.some(p=>p.class==="person"&&p.score>=CONFIDENCE);
+async function runFaceDetect(){
+  if(!faceApiReady||!camVideo.readyState||camVideo.readyState<2){scheduleFaceDetect();return;}
+  if(camDetecting)return;
+  camDetecting=true;
+  try{
+    const det=await faceapi
+      .detectSingleFace(camVideo,new faceapi.TinyFaceDetectorOptions({scoreThreshold:0.4}))
+      .withFaceExpressions();
 
-    // Only draw boxes if camera is visible
-    if(camVisible) drawCamPredictions(preds);
+    if(camPanelVisible){
+      camCtx.clearRect(0,0,camCanvas.width,camCanvas.height);
+    }
 
-    if(hasPerson !== camPersonState){
-      if(hasPerson===pendingState){ debounceCount++; }
-      else { pendingState=hasPerson; debounceCount=1; }
-      if(debounceCount>=DEBOUNCE_N){
-        camPersonState=hasPerson; debounceCount=0;
-        onCamStateChange(camPersonState);
+    if(det){
+      if(camPanelVisible) drawFaceBox(det);
+
+      // Find dominant expression
+      const exprObj=det.expressions;
+      const dominant=Object.entries(exprObj).sort((a,b)=>b[1]-a[1])[0][0];
+      const exprIdx=exprToIndex(dominant);
+
+      // Update badge
+      camExprBadge.textContent=dominant;
+      camExprBadge.className="active";
+
+      // Debounce
+      if(exprIdx===pendingExprIndex){
+        exprDebounceCount++;
+      }else{
+        pendingExprIndex=exprIdx;
+        exprDebounceCount=1;
       }
-    }else{ debounceCount=0; pendingState=camPersonState; }
+
+      if(exprDebounceCount>=EXPR_DEBOUNCE && exprIdx!==lastExprIndex){
+        lastExprIndex=exprIdx;
+        onFaceExpression(exprIdx);
+      }
+
+      if(!personPresent){
+        personPresent=true;
+        if(window._camSocketEmit)window._camSocketEmit(true);
+        camDot.className="detected";
+        camStatusTxt.textContent="⬤ Face detected";
+        camStatusTxt.className="cam-status-text detected";
+      }
+
+    }else{
+      camExprBadge.textContent="—";
+      camExprBadge.className="";
+      if(personPresent){
+        personPresent=false;
+        lastExprIndex=-1;
+        pendingExprIndex=-1;
+        exprDebounceCount=0;
+        if(window._camSocketEmit)window._camSocketEmit(false);
+        camDot.className="";
+        camStatusTxt.textContent="⬤ No face";
+        camStatusTxt.className="cam-status-text";
+        onFaceExpression(-1); // face gone → idle
+      }
+    }
   }catch(e){}
   camDetecting=false;
-  scheduleCamDetection();
+  scheduleFaceDetect();
 }
 
-function onCamStateChange(detected){
-  // Update camera UI
-  if(detected){
-    camStatusTxt.textContent="⬤ Person detected!"; camStatusTxt.className="cam-status-text detected";
-    camDot.className="detected";
-  }else{
-    camStatusTxt.textContent="⬤ No person"; camStatusTxt.className="cam-status-text";
-    camDot.className="";
+function drawFaceBox(det){
+  const box=det.detection.box;
+  const scaleX=camCanvas.width/camVideo.videoWidth;
+  const scaleY=camCanvas.height/camVideo.videoHeight;
+  const x=box.x*scaleX,y=box.y*scaleY,w=box.width*scaleX,h=box.height*scaleY;
+  camCtx.strokeStyle="#00d4ff";camCtx.lineWidth=2;
+  camCtx.strokeRect(x,y,w,h);
+  // dominant expression label
+  const exprObj=det.expressions;
+  const dominant=Object.entries(exprObj).sort((a,b)=>b[1]-a[1])[0];
+  const label=`${dominant[0]} ${Math.round(dominant[1]*100)}%`;
+  camCtx.font="bold 12px Arial";
+  const tw=camCtx.measureText(label).width;
+  camCtx.fillStyle="#00a6ff";camCtx.fillRect(x,y-18,tw+8,18);
+  camCtx.fillStyle="#fff";camCtx.fillText(label,x+4,y-4);
+}
+
+// Called when stable expression detected OR face gone (-1)
+function onFaceExpression(exprIdx){
+  if(window._autoEnabled && window._autoPlayExpression){
+    window._autoPlayExpression(exprIdx);
   }
-  // Emit via socket (handled below in socket block)
-  if(window._camSocketEmit) window._camSocketEmit(detected);
 }
 
-function drawCamPredictions(preds){
-  camCtx.clearRect(0,0,camCanvas.width,camCanvas.height);
-  preds.forEach(pred=>{
-    const [x,y,w,h]=pred.bbox;
-    const isPerson=pred.class==="person"&&pred.score>=CONFIDENCE;
-    camCtx.strokeStyle=isPerson?"#00d4ff":"#405070";
-    camCtx.lineWidth=isPerson?3:1.5;
-    camCtx.strokeRect(x,y,w,h);
-    const label=`${pred.class} ${Math.round(pred.score*100)}%`;
-    camCtx.font="bold 13px Arial";
-    const tw=camCtx.measureText(label).width;
-    camCtx.fillStyle=isPerson?"#00a6ff":"#223344";
-    camCtx.fillRect(x,y-20,tw+8,20);
-    camCtx.fillStyle="#ffffff";
-    camCtx.fillText(label,x+4,y-5);
-  });
-}
-
-function toggleCameraVisibility(){
-  camVisible = !camVisible;
-  const btn = document.getElementById("cam-toggle-btn");
-  const overlay = document.getElementById("cam-hidden-overlay");
-
-  if(camVisible){
-    camVideo.style.display = "block";
-    camCanvas.style.display = "block";
-    overlay.classList.remove("active");
-    btn.textContent = "Hide Cam";
-    btn.classList.remove("hidden-state");
-  }else{
-    camVideo.style.display = "none";
-    camCanvas.style.display = "none";
-    overlay.classList.add("active");
-    btn.textContent = "Show Cam";
-    btn.classList.add("hidden-state");
-    // Clear canvas so no stale boxes
-    camCtx.clearRect(0,0,camCanvas.width,camCanvas.height);
-  }
-  // Detection keeps running regardless — socket events still fire
+/* ══ Fallback: COCO-SSD person detection if face-api fails ═════════════════ */
+async function initFallbackCam(){
+  try{
+    await new Promise((res,rej)=>{
+      const s=document.createElement("script");
+      s.src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js";
+      s.onload=res;s.onerror=rej;document.head.appendChild(s);
+    });
+    await new Promise((res,rej)=>{
+      const s=document.createElement("script");
+      s.src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js";
+      s.onload=res;s.onerror=rej;document.head.appendChild(s);
+    });
+    const model=await cocoSsd.load();
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});
+    camVideo.srcObject=stream;
+    await new Promise(res=>camVideo.addEventListener("loadedmetadata",res,{once:true}));
+    camCanvas.width=camVideo.videoWidth;camCanvas.height=camVideo.videoHeight;
+    camStatusTxt.textContent="Person scanning…";
+    let pState=false;
+    async function detect(){
+      if(!camVideo.readyState||camVideo.readyState<2){setTimeout(detect,350);return;}
+      const preds=await model.detect(camVideo);
+      const has=preds.some(p=>p.class==="person"&&p.score>=0.55);
+      if(has!==pState){
+        pState=has;
+        if(window._camSocketEmit)window._camSocketEmit(has);
+        camDot.className=has?"detected":"";
+        camStatusTxt.textContent=has?"⬤ Person detected":"⬤ No person";
+        camStatusTxt.className="cam-status-text"+(has?" detected":"");
+        if(window._autoEnabled&&window._autoPlayExpression){
+          window._autoPlayExpression(has?1:-1);
+        }
+      }
+      setTimeout(detect,350);
+    }
+    detect();
+  }catch(e){camStatusTxt.textContent="Camera unavailable";}
 }
 
 /* ═══ SOCKET.IO ════════════════════════════════════════════════════════════ */
 (function initSocketIO(){
   var script=document.createElement("script");
   script.src="/socket.io/socket.io.js";
-
   script.onload=function(){
     var socket=io({transports:["polling"]});
 
-    var EXPR_NEUTRAL=0, EXPR_HAPPY=1, EXPR_WINK_L=2, EXPR_WINK_R=3, EXPR_THINKING=4;
+    var EXPR_NEUTRAL=0,EXPR_HAPPY=1,EXPR_WINK_L=2,EXPR_WINK_R=3,EXPR_THINKING=4;
+    var IDLE_SEQUENCE=[EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_L,EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_R];
 
-    var HAPPY_SEQUENCE=[EXPR_HAPPY,EXPR_WINK_L,EXPR_HAPPY,EXPR_WINK_R,EXPR_HAPPY,EXPR_THINKING,EXPR_WINK_L,EXPR_HAPPY,EXPR_WINK_R,EXPR_THINKING];
-    var IDLE_SEQUENCE =[EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_L,EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_R];
+    var autoTimer=null,autoIndex=0,currentSeq=IDLE_SEQUENCE;
 
-    var autoTimer=null, autoIndex=0, currentSequence=IDLE_SEQUENCE, personPresent=false;
-
-    function getDuration(){ return personPresent?2200:4000; }
+    function getDur(){return personPresent?2200:4000;}
 
     function playNext(){
-      if(!window._autoEnabled) return;
+      if(!window._autoEnabled)return;
       clearTimeout(autoTimer);
-      playSingle(currentSequence[autoIndex%currentSequence.length]);
+      playSingle(currentSeq[autoIndex%currentSeq.length]);
       autoIndex++;
-      autoTimer=setTimeout(playNext,getDuration());
+      autoTimer=setTimeout(playNext,getDur());
     }
 
-    function switchToSequence(seq,resetIndex){
-      if(!window._autoEnabled) return;
-      currentSequence=seq;
-      if(resetIndex) autoIndex=0;
+    function startSeq(seq,reset){
+      if(!window._autoEnabled)return;
+      currentSeq=seq;
+      if(reset)autoIndex=0;
       clearTimeout(autoTimer);
-      playSingle(currentSequence[0]);
+      playSingle(currentSeq[0]);
       autoIndex=1;
-      autoTimer=setTimeout(playNext,getDuration());
+      autoTimer=setTimeout(playNext,getDur());
     }
 
-    window._stopAutoSequence=function(){ clearTimeout(autoTimer); autoTimer=null; stopPlayer(); };
-
-    // Expose emit function so inline camera can use it
-    window._camSocketEmit=function(detected){
-      if(detected){ socket.emit("camera-person-detected"); }
-      else { socket.emit("camera-person-lost"); }
+    // Called by face detection with expression index (-1 = no face)
+    window._autoPlayExpression=function(exprIdx){
+      if(!window._autoEnabled)return;
+      clearTimeout(autoTimer);
+      if(exprIdx===-1){
+        // No face — run idle sequence
+        personPresent=false;
+        startSeq(IDLE_SEQUENCE,true);
+      }else{
+        // Play the matched expression immediately, then loop a sequence around it
+        personPresent=true;
+        // Build a short sequence: matched expr + wink variation + matched + thinking
+        var seq=buildPersonSeq(exprIdx);
+        clearTimeout(autoTimer);
+        currentSeq=seq;autoIndex=0;
+        playSingle(seq[0]);
+        autoIndex=1;
+        autoTimer=setTimeout(playNext,getDur());
+      }
     };
 
+    function buildPersonSeq(mainIdx){
+      // Rotate around main expression with winks for liveliness
+      if(mainIdx===EXPR_HAPPY)  return [EXPR_HAPPY,EXPR_WINK_L,EXPR_HAPPY,EXPR_WINK_R,EXPR_HAPPY,EXPR_THINKING];
+      if(mainIdx===EXPR_THINKING)return [EXPR_THINKING,EXPR_NEUTRAL,EXPR_THINKING,EXPR_WINK_L,EXPR_THINKING];
+      if(mainIdx===EXPR_WINK_L) return [EXPR_WINK_L,EXPR_HAPPY,EXPR_WINK_L,EXPR_WINK_R];
+      if(mainIdx===EXPR_WINK_R) return [EXPR_WINK_R,EXPR_HAPPY,EXPR_WINK_R,EXPR_WINK_L];
+      return [EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_L]; // neutral
+    }
+
+    window._stopAutoSequence=function(){clearTimeout(autoTimer);autoTimer=null;stopPlayer();};
+
+    // When auto is turned back ON — restart immediately
+    window._restartAutoSequence=function(){
+      // If face present use last known, else idle
+      if(lastExprIndex>=0){
+        window._autoPlayExpression(lastExprIndex);
+      }else{
+        startSeq(IDLE_SEQUENCE,true);
+      }
+    };
+
+    window._camSocketEmit=function(detected){
+      socket.emit(detected?"camera-person-detected":"camera-person-lost");
+    };
+
+    // Also respond to server-side events (from other camera sources / Raspberry)
     socket.on("person-detected",function(){
-      if(!window._autoEnabled) return;
-      if(personPresent) return;
-      personPresent=true;
-      switchToSequence(HAPPY_SEQUENCE,true);
+      if(!window._autoEnabled)return;
+      if(!personPresent){personPresent=true;window._autoPlayExpression(EXPR_HAPPY);}
     });
-
     socket.on("person-lost",function(){
-      if(!window._autoEnabled) return;
-      if(!personPresent) return;
-      personPresent=false;
-      switchToSequence(IDLE_SEQUENCE,true);
+      if(!window._autoEnabled)return;
+      personPresent=false;startSeq(IDLE_SEQUENCE,true);
     });
 
-    socket.on("connect",function(){ console.log("[Socket] connected:",socket.id); });
-    socket.on("disconnect",function(){ console.log("[Socket] disconnected"); });
+    socket.on("connect",function(){console.log("[Socket] connected:",socket.id);});
+    socket.on("disconnect",function(){console.log("[Socket] disconnected");});
 
-    switchToSequence(IDLE_SEQUENCE,true);
+    // Boot: start idle
+    startSeq(IDLE_SEQUENCE,true);
   };
-
-  script.onerror=function(){ console.info("[Socket] not available."); };
+  script.onerror=function(){
+    console.info("[Socket] not available — running standalone.");
+    // Standalone: still drive auto locally
+    window._restartAutoSequence=function(){
+      if(lastExprIndex>=0)window._autoPlayExpression&&window._autoPlayExpression(lastExprIndex);
+      else{playSingle(0);}
+    };
+    window._stopAutoSequence=function(){stopPlayer();};
+    window._autoPlayExpression=function(exprIdx){
+      if(!window._autoEnabled)return;
+      if(exprIdx<0){playSingle(0);}
+      else{playSingle(exprIdx);}
+    };
+    playSingle(0);
+  };
   document.head.appendChild(script);
 })();
 
-/* ═══ BOOT ══════════════════════════════════════════════════════════════════ */
+/* ═══ BOOT ═══════════════════════════════════════════════════════════════════ */
 buildGrid();
 animateEyes();
 </script>
-
 </body>
 </html>
