@@ -562,6 +562,8 @@ async function runFaceDetect(){
         camDot.className="";
         camStatusTxt.textContent="⬤ No face";
         camStatusTxt.className="cam-status-text";
+        // Stop expression sequence immediately so it can't override the sleep timer
+        if(window._stopAutoSequence) window._stopAutoSequence();
         // Wait 10s before switching to sleep
         clearTimeout(noFaceTimer);
         noFaceTimer=setTimeout(()=>{
@@ -592,17 +594,21 @@ function drawFaceBox(det){
 }
 
 // Called when stable expression detected OR face gone (-1)
+// esp32LastSent: track last value to skip duplicate resends within cooldown
+let esp32LastSent = -99;
 function onFaceExpression(exprIdx){
   if(window._autoEnabled && window._autoPlayExpression){
     window._autoPlayExpression(exprIdx);
   }
-  // Send to ESP32 via socket with 3s cooldown (avoid servo flooding)
-  if(exprIdx>=0 && !esp32Locked){
-    esp32Locked=true;
-    clearTimeout(esp32CooldownTimer);
-    if(window._esp32Emit) window._esp32Emit(exprIdx);
-    esp32CooldownTimer=setTimeout(()=>{ esp32Locked=false; }, ESP32_COOLDOWN);
-  }
+  // Map -1 (no face) → sleep index 5 for ESP32
+  var sendIdx = (exprIdx < 0) ? 5 : exprIdx;
+  // Within cooldown: only skip if same expression, allow if expression changed
+  if(esp32Locked && sendIdx === esp32LastSent) return;
+  esp32Locked=true;
+  esp32LastSent=sendIdx;
+  clearTimeout(esp32CooldownTimer);
+  if(window._esp32Emit) window._esp32Emit(sendIdx);
+  esp32CooldownTimer=setTimeout(()=>{ esp32Locked=false; }, ESP32_COOLDOWN);
 }
 
 /* ══ Fallback: COCO-SSD person detection if face-api fails ═════════════════ */
