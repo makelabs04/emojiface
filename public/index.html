@@ -114,6 +114,15 @@ html,body{width:100%;min-height:100%;background:#f7f7f4;font-family:Arial,Helvet
 .wink-eye.left{left:34px}.wink-eye.right{right:34px}
 @keyframes winkAnim{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.65)}}
 
+/* SLEEP EYES — same position/size as normal eyes but closed curved arcs */
+.sleep-eye{position:absolute;top:52px;width:68px;height:22px;border-bottom:8px solid #111;border-radius:0 0 60px 60px;opacity:.85;}
+.sleep-eye.left{left:34px}
+.sleep-eye.right{right:34px}
+
+/* ZZZ mark — floats up like think-mark */
+.zzz-mark{position:absolute;top:-14px;right:18px;font-size:28px;font-weight:900;color:#888;letter-spacing:-2px;animation:zzzFloat 2s ease-in-out infinite;}
+@keyframes zzzFloat{0%,100%{top:-14px;opacity:.7}50%{top:-26px;opacity:1}}
+
 .mouth{position:absolute;left:50%;transform:translateX(-50%);}
 .smile{bottom:-3px;width:34px;height:18px;border-bottom:5px solid #111;border-radius:0 0 50px 50px;animation:smileAnim 1.5s ease-in-out infinite;}
 @keyframes smileAnim{0%,100%{width:34px;height:18px}50%{width:42px;height:24px}}
@@ -141,7 +150,7 @@ html,body{width:100%;min-height:100%;background:#f7f7f4;font-family:Arial,Helvet
 <div id="list-page">
   <div class="header">
     <h1>Eye Expression Player</h1>
-    <p>5 expressions: Neutral, Happy, Wink Left, Wink Right, Thinking</p>
+    <p>5 expressions: Neutral, Happy, Wink Left, Wink Right, Thinking · Sleep when no face</p>
   </div>
 
   <div class="toolbar">
@@ -197,7 +206,8 @@ const expressions = [
   ["Happy",     "normal","open"],
   ["Wink Left", "winkL", "smile"],
   ["Wink Right","winkR", "open"],
-  ["Thinking",  "normal","wavy","think"]
+  ["Thinking",  "normal","wavy","think"],
+  ["Sleep",     "sleep", "none","zzz"]   // index 5 — no face detected
 ];
 
 const emotionLines = {
@@ -205,7 +215,8 @@ const emotionLines = {
   1:"Happy to see you!",
   2:"Hey, wink!",
   3:"How's it going?",
-  4:"Hmm, let me think…"
+  4:"Hmm, let me think…",
+  5:"Zzz… wake me up!"
 };
 
 /* Map detected face expression → emoji index
@@ -236,6 +247,7 @@ let isPlaying  = false;
 function eyeHTML(side,type){
   if(type==="winkL"&&side==="left") return `<span class="wink-eye left"></span>`;
   if(type==="winkR"&&side==="right") return `<span class="wink-eye right"></span>`;
+  if(type==="sleep") return `<span class="sleep-eye ${side}"></span>`;
   return `<span class="eye ${side}"><span class="iris"></span></span>`;
 }
 function faceHTML(exp,index){
@@ -244,8 +256,11 @@ function faceHTML(exp,index){
   const m=mouthType==="smile"?`<span class="mouth smile"></span>`
          :mouthType==="open" ?`<span class="mouth open"></span>`
          :mouthType==="wavy" ?`<span class="mouth wavy"></span>`:"";
-  const f=fx==="think"?`<span class="think-mark">?</span>`:"";
-  return `<div class="face-shell"><div class="face" style="--blink-time:${bt}s;--blink-delay:${bd}s;">
+  const f=fx==="think"?`<span class="think-mark">?</span>`
+         :fx==="zzz"  ?`<span class="zzz-mark">z z z</span>`:"";
+  // Sleep face floats more slowly
+  const floatStyle=type==="sleep"?"animation:floatFace 5s ease-in-out infinite;":"";
+  return `<div class="face-shell"><div class="face" style="--blink-time:${bt}s;--blink-delay:${bd}s;${floatStyle}">
     <span class="brow left"></span><span class="brow right"></span>
     ${eyeHTML("left",type)}${eyeHTML("right",type)}${m}${f}
   </div></div>`;
@@ -253,7 +268,8 @@ function faceHTML(exp,index){
 
 /* ═══ GRID BUILD ═══════════════════════════════════════════════════════════ */
 function buildGrid(){
-  grid.innerHTML=expressions.map((exp,i)=>`
+  // Show only first 5 (index 0-4) in manual grid; Sleep (5) is auto-only
+  grid.innerHTML=expressions.slice(0,5).map((exp,i)=>`
     <div class="card" data-index="${i}">
       <div class="card-face">${faceHTML(exp,i)}</div>
       <div class="card-label">${exp[0]}</div>
@@ -614,10 +630,9 @@ async function initFallbackCam(){
   script.onload=function(){
     var socket=io({transports:["polling"]});
 
-    var EXPR_NEUTRAL=0,EXPR_HAPPY=1,EXPR_WINK_L=2,EXPR_WINK_R=3,EXPR_THINKING=4;
-    var IDLE_SEQUENCE=[EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_L,EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_R];
+    var EXPR_NEUTRAL=0,EXPR_HAPPY=1,EXPR_WINK_L=2,EXPR_WINK_R=3,EXPR_THINKING=4,EXPR_SLEEP=5;
 
-    var autoTimer=null,autoIndex=0,currentSeq=IDLE_SEQUENCE;
+    var autoTimer=null,autoIndex=0,currentSeq=null;
 
     function getDur(){return personPresent?2200:4000;}
 
@@ -639,20 +654,24 @@ async function initFallbackCam(){
       autoTimer=setTimeout(playNext,getDur());
     }
 
+    function showSleep(){
+      // No face — just hold sleep, no timer loop
+      clearTimeout(autoTimer);
+      autoTimer=null;
+      currentSeq=null;
+      playSingle(EXPR_SLEEP);
+    }
+
     // Called by face detection with expression index (-1 = no face)
     window._autoPlayExpression=function(exprIdx){
       if(!window._autoEnabled)return;
       clearTimeout(autoTimer);
       if(exprIdx===-1){
-        // No face — run idle sequence
         personPresent=false;
-        startSeq(IDLE_SEQUENCE,true);
+        showSleep();
       }else{
-        // Play the matched expression immediately, then loop a sequence around it
         personPresent=true;
-        // Build a short sequence: matched expr + wink variation + matched + thinking
         var seq=buildPersonSeq(exprIdx);
-        clearTimeout(autoTimer);
         currentSeq=seq;autoIndex=0;
         playSingle(seq[0]);
         autoIndex=1;
@@ -673,11 +692,10 @@ async function initFallbackCam(){
 
     // When auto is turned back ON — restart immediately
     window._restartAutoSequence=function(){
-      // If face present use last known, else idle
       if(lastExprIndex>=0){
         window._autoPlayExpression(lastExprIndex);
       }else{
-        startSeq(IDLE_SEQUENCE,true);
+        showSleep();
       }
     };
 
@@ -692,29 +710,28 @@ async function initFallbackCam(){
     });
     socket.on("person-lost",function(){
       if(!window._autoEnabled)return;
-      personPresent=false;startSeq(IDLE_SEQUENCE,true);
+      personPresent=false;showSleep();
     });
 
     socket.on("connect",function(){console.log("[Socket] connected:",socket.id);});
     socket.on("disconnect",function(){console.log("[Socket] disconnected");});
 
-    // Boot: start idle
-    startSeq(IDLE_SEQUENCE,true);
+    // Boot: show sleep until a face appears
+    showSleep();
   };
   script.onerror=function(){
     console.info("[Socket] not available — running standalone.");
-    // Standalone: still drive auto locally
     window._restartAutoSequence=function(){
       if(lastExprIndex>=0)window._autoPlayExpression&&window._autoPlayExpression(lastExprIndex);
-      else{playSingle(0);}
+      else playSingle(5); // sleep
     };
     window._stopAutoSequence=function(){stopPlayer();};
     window._autoPlayExpression=function(exprIdx){
       if(!window._autoEnabled)return;
-      if(exprIdx<0){playSingle(0);}
+      if(exprIdx<0){playSingle(5);}  // sleep
       else{playSingle(exprIdx);}
     };
-    playSingle(0);
+    playSingle(5); // start with sleep
   };
   document.head.appendChild(script);
 })();
