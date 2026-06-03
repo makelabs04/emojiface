@@ -75,11 +75,10 @@ html,body{
   background:#f7f7f4;
 }
 
-#list-page.active{display:block}
+#list-page.active{display:flex; flex-direction:column; gap:16px;}
 
 .header{
   text-align:center;
-  margin-bottom:16px;
 }
 
 .header h1{
@@ -101,7 +100,6 @@ html,body{
   align-items:center;
   justify-content:center;
   gap:10px;
-  margin-bottom:22px;
 }
 
 .btn{
@@ -132,16 +130,25 @@ html,body{
   border:1px solid #c7e8ff;
 }
 
-.grid{
-  max-width:900px;
-  margin:auto;
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
+/* MAIN LAYOUT: grid left, camera right */
+.main-layout{
+  display:flex;
   gap:22px;
+  align-items:flex-start;
+  max-width:1100px;
+  margin:0 auto;
+  width:100%;
+}
+
+.grid{
+  flex:1;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
 }
 
 .card{
-  min-height:180px;
+  min-height:160px;
   border:2px solid rgba(0,109,255,.16);
   border-radius:18px;
   background:white;
@@ -197,6 +204,114 @@ html,body{
   margin-top:8px;
 }
 
+/* CAMERA PANEL */
+#camera-panel{
+  width:280px;
+  flex-shrink:0;
+  background:#0a0f1a;
+  border-radius:16px;
+  overflow:hidden;
+  border:2px solid #1a3a5c;
+  display:flex;
+  flex-direction:column;
+}
+
+.camera-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 14px;
+  background:#0d1525;
+  border-bottom:1px solid #1a3a5c;
+}
+
+.camera-title{
+  color:#00a6ff;
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:.04em;
+}
+
+#cam-status-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#405070;
+  transition:background .3s;
+}
+
+#cam-status-dot.detected{background:#00d4ff; box-shadow:0 0 8px #00a6ff;}
+
+.camera-body{
+  position:relative;
+  background:#000;
+}
+
+#cam-video{
+  width:100%;
+  display:block;
+}
+
+#cam-canvas{
+  position:absolute;
+  top:0;left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+
+/* Hidden state: show placeholder */
+#cam-hidden-overlay{
+  display:none;
+  background:#0d1525;
+  width:100%;
+  height:157px;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:8px;
+}
+
+#cam-hidden-overlay.active{display:flex;}
+
+.cam-hidden-icon{font-size:36px; opacity:.5;}
+.cam-hidden-text{color:#405070; font-size:12px; font-weight:700;}
+
+.camera-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px 12px;
+  background:#0d1525;
+  border-top:1px solid #1a3a5c;
+  gap:8px;
+}
+
+.cam-status-text{
+  color:#405070;
+  font-size:11px;
+  font-weight:700;
+  flex:1;
+}
+
+.cam-status-text.detected{color:#00d4ff;}
+
+#cam-toggle-btn{
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  border:none;
+  cursor:pointer;
+  background:#ff3355;
+  color:#fff;
+  white-space:nowrap;
+}
+
+#cam-toggle-btn.hidden-state{
+  background:#00d48a;
+}
+
 /* ANIMATION PAGE */
 #anim-page{
   display:none;
@@ -230,24 +345,27 @@ html,body{
   color:#fff;
 }
 
-.anim-counter{
+/* Emotion text — shown briefly when emoji starts, then fades */
+#anim-emotion-text{
   position:absolute;
-  top:19px;
-  left:126px;
-  color:#1260a0;
-  font-size:16px;
+  bottom:40px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:10;
+  font-size:clamp(1rem,3vw,1.5rem);
   font-weight:900;
-  z-index:5;
+  color:#0a2a4a;
+  background:rgba(255,255,255,0.88);
+  padding:10px 28px;
+  border-radius:999px;
+  box-shadow:0 4px 18px rgba(0,109,255,.12);
+  opacity:0;
+  transition:opacity .4s;
+  white-space:nowrap;
+  pointer-events:none;
 }
 
-.anim-hint{
-  position:absolute;
-  top:16px;
-  right:18px;
-  color:#2278b0;
-  font-size:13px;
-  z-index:5;
-}
+#anim-emotion-text.visible{opacity:1;}
 
 .anim-progress{
   position:absolute;
@@ -334,7 +452,7 @@ html,body{
   transform:rotate(20deg);
 }
 
-/* EYES - SIZE INCREASED */
+/* EYES */
 .eye{
   position:absolute;
   top:30px;
@@ -386,7 +504,7 @@ html,body{
 .eye.left::before{left:-15px}
 .eye.right::before{right:-15px}
 
-/* WINK - SIZE MATCHED */
+/* WINK */
 .wink-eye{
   position:absolute;
   top:58px;
@@ -405,7 +523,7 @@ html,body{
   50%{transform:scaleY(.65)}
 }
 
-/* MOUTHS - MOVED DOWN */
+/* MOUTHS */
 .mouth{
   position:absolute;
   left:50%;
@@ -482,6 +600,8 @@ html,body{
 }
 
 @media(max-width:900px){
+  .main-layout{flex-direction:column;}
+  #camera-panel{width:100%;}
   .grid{grid-template-columns:repeat(3,1fr)}
 }
 
@@ -490,7 +610,6 @@ html,body{
 }
 
 @media(max-width:520px){
-  .grid{grid-template-columns:1fr}
   .stage-face{transform:scale(2.1)}
 }
 </style>
@@ -506,8 +625,8 @@ html,body{
 
 <div id="list-page">
   <div class="header">
-    <h1> Eye Expression Player</h1>
-    <p>Only 5 expressions: Neutral, Happy, Wink Left, Wink Right, Thinking</p>
+    <h1>Eye Expression Player</h1>
+    <p>5 expressions: Neutral, Happy, Wink Left, Wink Right, Thinking</p>
   </div>
 
   <div class="toolbar">
@@ -515,29 +634,71 @@ html,body{
     <button class="btn outline" onclick="clearSelection()">Clear</button>
     <span class="count" id="sel-count">0 selected</span>
     <button class="btn" id="play-selected" onclick="playSelected()" style="display:none;">▶ Play Loop</button>
-    <button class="btn" id="auto-btn" onclick="toggleAuto()" title="When ON: robot auto-plays expressions based on camera. When OFF: you control manually.">🤖 Auto: ON</button>
+    <button class="btn" id="auto-btn" onclick="toggleAuto()">🤖 Auto: ON</button>
     <button class="btn outline" onclick="toggleFullscreen()">⛶ Fullscreen</button>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="main-layout">
+    <!-- Expression grid -->
+    <div class="grid" id="grid"></div>
+
+    <!-- Inline camera panel -->
+    <div id="camera-panel">
+      <div class="camera-header">
+        <span class="camera-title">📷 CAMERA DETECTION</span>
+        <span id="cam-status-dot"></span>
+      </div>
+
+      <div class="camera-body">
+        <!-- Live video (shown when camera is visible) -->
+        <video id="cam-video" autoplay muted playsinline style="display:block;"></video>
+        <canvas id="cam-canvas"></canvas>
+        <!-- Placeholder shown when camera is hidden -->
+        <div id="cam-hidden-overlay">
+          <div class="cam-hidden-icon">🙈</div>
+          <div class="cam-hidden-text">Camera hidden · still detecting</div>
+        </div>
+      </div>
+
+      <div class="camera-footer">
+        <span class="cam-status-text" id="cam-status-text">Waiting for model…</span>
+        <button id="cam-toggle-btn" onclick="toggleCameraVisibility()">Hide Cam</button>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- ANIMATION PAGE (full screen emoji) -->
 <div id="anim-page">
   <button class="anim-back-btn" type="button" onclick="event.stopPropagation(); stopPlayer();">← Back</button>
-  <div class="anim-counter" id="anim-counter"></div>
-  <div class="anim-hint">Tap / ESC / Space to stop</div>
   <div id="anim-stage"></div>
+  <!-- Emotion text shown briefly on each expression change -->
+  <div id="anim-emotion-text"></div>
   <div class="anim-progress" id="anim-bar"></div>
 </div>
 
+<!-- TensorFlow.js + COCO-SSD for in-page detection -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+
 <script>
+/* ═══ EXPRESSIONS ══════════════════════════════════════════════════════════ */
 const expressions = [
-  ["1. Neutral","normal","smile"],
-  ["2. Happy","normal","open"],
-  ["3. Wink Left","winkL","smile"],
-  ["4. Wink Right","winkR","open"],
-  ["5. Thinking","normal","wavy","think"]
+  ["Neutral",  "normal","smile"],
+  ["Happy",    "normal","open"],
+  ["Wink Left","winkL", "smile"],
+  ["Wink Right","winkR","open"],
+  ["Thinking", "normal","wavy","think"]
 ];
+
+// Short friendly lines shown while each emoji plays
+const emotionLines = {
+  0: "Hello there!",
+  1: "Happy to see you!",
+  2: "Hey, wink!",
+  3: "How's it going?",
+  4: "Hmm, let me think…"
+};
 
 const grid = document.getElementById("grid");
 let selected = new Set();
@@ -547,438 +708,390 @@ let playIndex = 0;
 let playTimer = null;
 let isPlaying = false;
 
-function eye(side,type){
+/* ═══ FACE HTML HELPERS ════════════════════════════════════════════════════ */
+function eye(side, type){
   if(type==="winkL" && side==="left") return `<span class="wink-eye left"></span>`;
   if(type==="winkR" && side==="right") return `<span class="wink-eye right"></span>`;
-
-  return `
-    <span class="eye ${side}">
-      <span class="iris"></span>
-    </span>
-  `;
+  return `<span class="eye ${side}"><span class="iris"></span></span>`;
 }
 
-function eyes(type){
-  return eye("left",type) + eye("right",type);
-}
-
-function mouth(type){
-  if(type==="smile") return `<span class="mouth smile"></span>`;
-  if(type==="open") return `<span class="mouth open"></span>`;
-  if(type==="wavy") return `<span class="mouth wavy"></span>`;
-  return "";
-}
-
-function effects(type){
-  if(type==="think") return `<span class="think-mark">?</span>`;
-  return "";
-}
-
-function faceHTML(exp,index){
-  const [name,type,mouthType,fx] = exp;
-  const blinkTime = 3.2 + (index % 5) * .3;
+function faceHTML(exp, index){
+  const [name, type, mouthType, fx] = exp;
+  const blinkTime  = 3.2 + (index % 5) * .3;
   const blinkDelay = (index % 7) * .2;
-
+  const mouthHTML  = mouthType === "smile" ? `<span class="mouth smile"></span>`
+                   : mouthType === "open"  ? `<span class="mouth open"></span>`
+                   : mouthType === "wavy"  ? `<span class="mouth wavy"></span>` : "";
+  const fxHTML     = fx === "think" ? `<span class="think-mark">?</span>` : "";
   return `
     <div class="face-shell">
       <div class="face" style="--blink-time:${blinkTime}s;--blink-delay:${blinkDelay}s;">
         <span class="brow left"></span>
         <span class="brow right"></span>
-        ${eyes(type)}
-        ${mouth(mouthType)}
-        ${effects(fx)}
+        ${eye("left",type)}${eye("right",type)}
+        ${mouthHTML}${fxHTML}
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
+/* ═══ GRID ══════════════════════════════════════════════════════════════════ */
 function buildGrid(){
-  grid.innerHTML = expressions.map((exp,index)=>`
-    <div class="card" data-index="${index}">
-      <div class="card-face">${faceHTML(exp,index)}</div>
+  grid.innerHTML = expressions.map((exp,i)=>`
+    <div class="card" data-index="${i}">
+      <div class="card-face">${faceHTML(exp,i)}</div>
       <div class="card-label">${exp[0]}</div>
-    </div>
-  `).join("");
+    </div>`).join("");
 
   document.querySelectorAll(".card").forEach(card=>{
     const index = Number(card.dataset.index);
-    let pressTimer = null;
-    let longPressed = false;
+    let pressTimer = null, longPressed = false;
 
     card.addEventListener("pointerdown",()=>{
       longPressed = false;
-      pressTimer = setTimeout(()=>{
-        longPressed = true;
-        toggleSelect(index);
-      },500);
+      pressTimer = setTimeout(()=>{ longPressed=true; toggleSelect(index); },500);
     });
-
     card.addEventListener("pointerup",()=>{
       clearTimeout(pressTimer);
       if(longPressed) return;
-
-      if(selected.size > 0){
-        toggleSelect(index);
-      }else{
-        playSingle(index);
-      }
+      selected.size > 0 ? toggleSelect(index) : playSingle(index);
     });
-
     card.addEventListener("pointerleave",()=>clearTimeout(pressTimer));
   });
 }
 
-function toggleSelect(index){
-  selected.has(index) ? selected.delete(index) : selected.add(index);
-  refreshSelection();
-}
-
+function toggleSelect(index){ selected.has(index)?selected.delete(index):selected.add(index); refreshSelection(); }
 function refreshSelection(){
-  document.querySelectorAll(".card").forEach(card=>{
-    const index = Number(card.dataset.index);
-    card.classList.toggle("selected", selected.has(index));
-  });
-
-  document.getElementById("sel-count").textContent = selected.size + " selected";
-  document.getElementById("play-selected").style.display = selected.size ? "inline-block" : "none";
+  document.querySelectorAll(".card").forEach(c=>c.classList.toggle("selected",selected.has(Number(c.dataset.index))));
+  document.getElementById("sel-count").textContent = selected.size+" selected";
+  document.getElementById("play-selected").style.display = selected.size?"inline-block":"none";
 }
+function selectAll(){ selected=new Set(expressions.map((_,i)=>i)); refreshSelection(); }
+function clearSelection(){ selected.clear(); refreshSelection(); }
 
-function selectAll(){
-  selected = new Set(expressions.map((_,i)=>i));
-  refreshSelection();
-}
-
-function clearSelection(){
-  selected.clear();
-  refreshSelection();
-}
-
-function playSingle(index){
-  playQueue = [index];
-  playIndex = 0;
-  startPlayer();
-}
-
-function playSelected(){
-  if(selected.size === 0) return;
-  playQueue = [...selected];
-  playIndex = 0;
-  startPlayer();
-}
+/* ═══ PLAYER ════════════════════════════════════════════════════════════════ */
+function playSingle(index){ playQueue=[index]; playIndex=0; startPlayer(); }
+function playSelected(){ if(!selected.size) return; playQueue=[...selected]; playIndex=0; startPlayer(); }
 
 function startPlayer(){
-  isPlaying = true;
+  isPlaying=true;
   document.getElementById("list-page").classList.remove("active");
   document.getElementById("anim-page").classList.add("active");
   showFrame();
 }
 
+let emotionHideTimer = null;
+
 function showFrame(){
   clearTimeout(playTimer);
 
-  const index = playQueue[playIndex];
-  const exp = expressions[index];
-  const duration = 2600;
+  const index   = playQueue[playIndex];
+  const exp     = expressions[index];
+  const duration= 2600;
 
-  document.getElementById("anim-counter").textContent = `${playIndex + 1}/${playQueue.length} · ${exp[0]}`;
-  document.getElementById("anim-stage").innerHTML = `<div class="stage-face">${faceHTML(exp,index)}</div>`;
+  // Render emoji — NO counter text
+  document.getElementById("anim-stage").innerHTML =
+    `<div class="stage-face">${faceHTML(exp,index)}</div>`;
 
-  speakExpression(exp[0]);
+  // Show emotion line briefly (1.4s), then fade
+  const textEl = document.getElementById("anim-emotion-text");
+  clearTimeout(emotionHideTimer);
+  textEl.textContent = emotionLines[index] || exp[0];
+  textEl.classList.add("visible");
+  emotionHideTimer = setTimeout(()=>textEl.classList.remove("visible"), 1400);
+
   playTone();
 
   const bar = document.getElementById("anim-bar");
-  bar.style.transition = "none";
-  bar.style.width = "0%";
-
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      bar.style.transition = `width ${duration}ms linear`;
-      bar.style.width = "100%";
-    });
-  });
+  bar.style.transition="none"; bar.style.width="0%";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    bar.style.transition=`width ${duration}ms linear`; bar.style.width="100%";
+  }));
 
   playTimer = setTimeout(()=>{
     if(!isPlaying) return;
-    playIndex = (playIndex + 1) % playQueue.length;
+    playIndex = (playIndex+1) % playQueue.length;
     showFrame();
-  },duration);
+  }, duration);
 }
 
 function stopPlayer(){
-  isPlaying = false;
+  isPlaying=false;
   clearTimeout(playTimer);
-
+  clearTimeout(emotionHideTimer);
   if(window.speechSynthesis) speechSynthesis.cancel();
-
-  const bar = document.getElementById("anim-bar");
-  bar.style.transition = "none";
-  bar.style.width = "0%";
-
+  const bar=document.getElementById("anim-bar");
+  bar.style.transition="none"; bar.style.width="0%";
+  document.getElementById("anim-emotion-text").classList.remove("visible");
   document.getElementById("anim-page").classList.remove("active");
   document.getElementById("list-page").classList.add("active");
 }
 
-document.getElementById("anim-page").addEventListener("click",stopPlayer);
-
+document.getElementById("anim-page").addEventListener("click", stopPlayer);
 document.addEventListener("keydown",e=>{
   if(document.getElementById("anim-page").classList.contains("active")){
-    if(e.key==="Escape" || e.key===" "){
-      e.preventDefault();
-      stopPlayer();
-    }
+    if(e.key==="Escape"||e.key===" "){ e.preventDefault(); stopPlayer(); }
   }
 });
 
 function toggleFullscreen(){
-  if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen().catch(()=>{});
-  }else{
-    document.exitFullscreen().catch(()=>{});
-  }
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen().catch(()=>{});
 }
 
-/* AUDIO */
+/* ═══ AUDIO ════════════════════════════════════════════════════════════════ */
 function unlock(){
-  if(!audioCtx){
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-
-  if(audioCtx.state === "suspended") audioCtx.resume();
-
-  document.getElementById("start-screen").style.display = "none";
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended") audioCtx.resume();
+  document.getElementById("start-screen").style.display="none";
   document.getElementById("list-page").classList.add("active");
+  // Start camera after unlock
+  initCamera();
 }
 
-document.getElementById("start-screen").addEventListener("click",unlock);
-document.getElementById("start-screen").addEventListener("touchend",e=>{
-  e.preventDefault();
-  unlock();
-},{passive:false});
+document.getElementById("start-screen").addEventListener("click", unlock);
+document.getElementById("start-screen").addEventListener("touchend",e=>{ e.preventDefault(); unlock(); },{passive:false});
 
 function playTone(){
   if(!audioCtx) return;
-
-  const now = audioCtx.currentTime;
-  const seq = [523,659,784];
-
-  seq.forEach((freq,i)=>{
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, now + i * 0.12);
-    gain.gain.setValueAtTime(0.18, now + i * 0.12);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.12);
-
-    osc.start(now + i * 0.12);
-    osc.stop(now + i * 0.12 + 0.13);
+  const now=audioCtx.currentTime;
+  [523,659,784].forEach((freq,i)=>{
+    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type="sine";
+    osc.frequency.setValueAtTime(freq,now+i*.12);
+    gain.gain.setValueAtTime(0.18,now+i*.12);
+    gain.gain.exponentialRampToValueAtTime(0.001,now+i*.12+.12);
+    osc.start(now+i*.12); osc.stop(now+i*.12+.13);
   });
 }
 
-function speakExpression(text){
-  if(!window.speechSynthesis) return;
-
-  speechSynthesis.cancel();
-
-  const clean = text.replace(/^\d+\.\s*/,"");
-  const utter = new SpeechSynthesisUtterance(clean);
-  utter.rate = 0.95;
-  utter.pitch = 1.05;
-  utter.volume = 0.8;
-
-  setTimeout(()=>speechSynthesis.speak(utter),80);
-}
-
-/* REAL TIME EYE FOLLOW */
-let pointer = {
-  x:innerWidth / 2,
-  y:innerHeight / 2,
-  active:false,
-  last:0
-};
-
-function updatePointer(x,y){
-  pointer.x = x;
-  pointer.y = y;
-  pointer.active = true;
-  pointer.last = performance.now();
-}
-
+/* ═══ EYE FOLLOW ═══════════════════════════════════════════════════════════ */
+let pointer={x:innerWidth/2,y:innerHeight/2,active:false,last:0};
+function updatePointer(x,y){ pointer.x=x; pointer.y=y; pointer.active=true; pointer.last=performance.now(); }
 window.addEventListener("mousemove",e=>updatePointer(e.clientX,e.clientY));
+window.addEventListener("touchmove",e=>{ if(e.touches.length) updatePointer(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
 
-window.addEventListener("touchmove",e=>{
-  if(e.touches.length) updatePointer(e.touches[0].clientX,e.touches[0].clientY);
-},{passive:true});
-
-function clamp(v,min,max){
-  return Math.max(min,Math.min(max,v));
-}
-
+function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
 function animateEyes(){
-  const now = performance.now();
-
+  const now=performance.now();
   document.querySelectorAll(".face").forEach((face,i)=>{
-    const rect = face.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    let x;
-    let y;
-
-    if(pointer.active && now - pointer.last < 2500){
-      x = clamp((pointer.x - cx) / 45, -6, 6);
-      y = clamp((pointer.y - cy) / 60, -4, 4);
+    const rect=face.getBoundingClientRect();
+    const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    let x,y;
+    if(pointer.active&&now-pointer.last<2500){
+      x=clamp((pointer.x-cx)/45,-6,6); y=clamp((pointer.y-cy)/60,-4,4);
     }else{
-      x = Math.sin(now / 900 + i * .5) * 4;
-      y = Math.cos(now / 1000 + i * .4) * 3;
+      x=Math.sin(now/900+i*.5)*4; y=Math.cos(now/1000+i*.4)*3;
     }
-
-    face.style.setProperty("--look-x", x + "px");
-    face.style.setProperty("--look-y", y + "px");
+    face.style.setProperty("--look-x",x+"px");
+    face.style.setProperty("--look-y",y+"px");
   });
-
   requestAnimationFrame(animateEyes);
 }
 
+/* ═══ AUTO MODE ════════════════════════════════════════════════════════════ */
+window._autoEnabled = true;
+
 function toggleAuto(){
-  // Exposed globally so socket block can read it
   window._autoEnabled = !window._autoEnabled;
-  var btn = document.getElementById("auto-btn");
+  const btn=document.getElementById("auto-btn");
   if(window._autoEnabled){
-    btn.textContent = "🤖 Auto: ON";
-    btn.classList.remove("outline");
-  } else {
-    btn.textContent = "🤖 Auto: OFF";
-    btn.classList.add("outline");
-    // Stop any running auto sequence immediately
+    btn.textContent="🤖 Auto: ON"; btn.classList.remove("outline");
+  }else{
+    btn.textContent="🤖 Auto: OFF"; btn.classList.add("outline");
     if(window._stopAutoSequence) window._stopAutoSequence();
   }
 }
 
-// Start with auto ON
-window._autoEnabled = true;
+/* ═══ CAMERA — inline detection ════════════════════════════════════════════ */
+let camModel      = null;
+let camPersonState= false;
+let camDetecting  = false;
+let camVisible    = true;
+let camStream     = null;
 
-buildGrid();
-animateEyes();
+const CONFIDENCE = 0.55;
+const DEBOUNCE_N = 3;
+let debounceCount = 0, pendingState = false;
 
-/* ═══════════════════════════════════════════════════════════════
-   SOCKET.IO — Smart Expression Engine
-   ═══════════════════════════════════════════════════════════════ */
-(function initSocketIO() {
-  var script = document.createElement("script");
-  script.src = "/socket.io/socket.io.js";
+const camVideo   = document.getElementById("cam-video");
+const camCanvas  = document.getElementById("cam-canvas");
+const camCtx     = camCanvas.getContext("2d");
+const camStatusTxt = document.getElementById("cam-status-text");
+const camDot     = document.getElementById("cam-status-dot");
 
-  script.onload = function () {
-    var socket = io({ transports: ["polling"] });
+async function initCamera(){
+  camStatusTxt.textContent = "Loading model…";
+  try {
+    camModel = await cocoSsd.load();
+  } catch(e){
+    camStatusTxt.textContent = "Model failed"; return;
+  }
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:"user", width:{ideal:640}, height:{ideal:480} }, audio:false
+    });
+    camVideo.srcObject = camStream;
+    await new Promise(res=>camVideo.addEventListener("loadedmetadata",res,{once:true}));
+    camCanvas.width  = camVideo.videoWidth;
+    camCanvas.height = camVideo.videoHeight;
+    camStatusTxt.textContent = "Scanning…";
+  } catch(e){
+    camStatusTxt.textContent = "No camera"; return;
+  }
+  scheduleCamDetection();
+}
 
-    // Expression indexes
-    var EXPR_NEUTRAL  = 0;
-    var EXPR_HAPPY    = 1;
-    var EXPR_WINK_L   = 2;
-    var EXPR_WINK_R   = 3;
-    var EXPR_THINKING = 4;
+function scheduleCamDetection(){ setTimeout(runCamDetection, 350); }
 
-    // ── PERSON PRESENT — lively sequence ────────────────────────────────────
-    var HAPPY_SEQUENCE = [
-      EXPR_HAPPY,
-      EXPR_WINK_L,
-      EXPR_HAPPY,
-      EXPR_WINK_R,
-      EXPR_HAPPY,
-      EXPR_THINKING,
-      EXPR_WINK_L,
-      EXPR_HAPPY,
-      EXPR_WINK_R,
-      EXPR_THINKING
-    ];
+async function runCamDetection(){
+  if(!camModel||!camVideo.readyState||camVideo.readyState<2){ scheduleCamDetection(); return; }
+  if(camDetecting) return;
+  camDetecting = true;
+  try {
+    const preds = await camModel.detect(camVideo);
+    const hasPerson = preds.some(p=>p.class==="person"&&p.score>=CONFIDENCE);
 
-    // ── NO PERSON — calm idle sequence ───────────────────────────────────────
-    var IDLE_SEQUENCE = [
-      EXPR_NEUTRAL,
-      EXPR_THINKING,
-      EXPR_NEUTRAL,
-      EXPR_WINK_L,
-      EXPR_NEUTRAL,
-      EXPR_THINKING,
-      EXPR_NEUTRAL,
-      EXPR_WINK_R
-    ];
+    // Only draw boxes if camera is visible
+    if(camVisible) drawCamPredictions(preds);
 
-    var autoTimer       = null;
-    var autoIndex       = 0;
-    var currentSequence = IDLE_SEQUENCE;
-    var personPresent   = false;
+    if(hasPerson !== camPersonState){
+      if(hasPerson===pendingState){ debounceCount++; }
+      else { pendingState=hasPerson; debounceCount=1; }
+      if(debounceCount>=DEBOUNCE_N){
+        camPersonState=hasPerson; debounceCount=0;
+        onCamStateChange(camPersonState);
+      }
+    }else{ debounceCount=0; pendingState=camPersonState; }
+  }catch(e){}
+  camDetecting=false;
+  scheduleCamDetection();
+}
 
-    function getDuration() {
-      return personPresent ? 2200 : 4000;
-    }
+function onCamStateChange(detected){
+  // Update camera UI
+  if(detected){
+    camStatusTxt.textContent="⬤ Person detected!"; camStatusTxt.className="cam-status-text detected";
+    camDot.className="detected";
+  }else{
+    camStatusTxt.textContent="⬤ No person"; camStatusTxt.className="cam-status-text";
+    camDot.className="";
+  }
+  // Emit via socket (handled below in socket block)
+  if(window._camSocketEmit) window._camSocketEmit(detected);
+}
 
-    function playNext() {
-      // Stop if auto was turned off while timer was running
-      if (!window._autoEnabled) return;
+function drawCamPredictions(preds){
+  camCtx.clearRect(0,0,camCanvas.width,camCanvas.height);
+  preds.forEach(pred=>{
+    const [x,y,w,h]=pred.bbox;
+    const isPerson=pred.class==="person"&&pred.score>=CONFIDENCE;
+    camCtx.strokeStyle=isPerson?"#00d4ff":"#405070";
+    camCtx.lineWidth=isPerson?3:1.5;
+    camCtx.strokeRect(x,y,w,h);
+    const label=`${pred.class} ${Math.round(pred.score*100)}%`;
+    camCtx.font="bold 13px Arial";
+    const tw=camCtx.measureText(label).width;
+    camCtx.fillStyle=isPerson?"#00a6ff":"#223344";
+    camCtx.fillRect(x,y-20,tw+8,20);
+    camCtx.fillStyle="#ffffff";
+    camCtx.fillText(label,x+4,y-5);
+  });
+}
+
+function toggleCameraVisibility(){
+  camVisible = !camVisible;
+  const btn = document.getElementById("cam-toggle-btn");
+  const overlay = document.getElementById("cam-hidden-overlay");
+
+  if(camVisible){
+    camVideo.style.display = "block";
+    camCanvas.style.display = "block";
+    overlay.classList.remove("active");
+    btn.textContent = "Hide Cam";
+    btn.classList.remove("hidden-state");
+  }else{
+    camVideo.style.display = "none";
+    camCanvas.style.display = "none";
+    overlay.classList.add("active");
+    btn.textContent = "Show Cam";
+    btn.classList.add("hidden-state");
+    // Clear canvas so no stale boxes
+    camCtx.clearRect(0,0,camCanvas.width,camCanvas.height);
+  }
+  // Detection keeps running regardless — socket events still fire
+}
+
+/* ═══ SOCKET.IO ════════════════════════════════════════════════════════════ */
+(function initSocketIO(){
+  var script=document.createElement("script");
+  script.src="/socket.io/socket.io.js";
+
+  script.onload=function(){
+    var socket=io({transports:["polling"]});
+
+    var EXPR_NEUTRAL=0, EXPR_HAPPY=1, EXPR_WINK_L=2, EXPR_WINK_R=3, EXPR_THINKING=4;
+
+    var HAPPY_SEQUENCE=[EXPR_HAPPY,EXPR_WINK_L,EXPR_HAPPY,EXPR_WINK_R,EXPR_HAPPY,EXPR_THINKING,EXPR_WINK_L,EXPR_HAPPY,EXPR_WINK_R,EXPR_THINKING];
+    var IDLE_SEQUENCE =[EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_L,EXPR_NEUTRAL,EXPR_THINKING,EXPR_NEUTRAL,EXPR_WINK_R];
+
+    var autoTimer=null, autoIndex=0, currentSequence=IDLE_SEQUENCE, personPresent=false;
+
+    function getDuration(){ return personPresent?2200:4000; }
+
+    function playNext(){
+      if(!window._autoEnabled) return;
       clearTimeout(autoTimer);
-      var idx = currentSequence[autoIndex % currentSequence.length];
-      playSingle(idx);
+      playSingle(currentSequence[autoIndex%currentSequence.length]);
       autoIndex++;
-      autoTimer = setTimeout(playNext, getDuration());
+      autoTimer=setTimeout(playNext,getDuration());
     }
 
-    function switchToSequence(seq, resetIndex) {
-      // Do nothing if auto is OFF — user is in manual control
-      if (!window._autoEnabled) return;
-      currentSequence = seq;
-      if (resetIndex) autoIndex = 0;
+    function switchToSequence(seq,resetIndex){
+      if(!window._autoEnabled) return;
+      currentSequence=seq;
+      if(resetIndex) autoIndex=0;
       clearTimeout(autoTimer);
-      var idx = currentSequence[0];
-      playSingle(idx);
-      autoIndex = 1;
-      autoTimer = setTimeout(playNext, getDuration());
+      playSingle(currentSequence[0]);
+      autoIndex=1;
+      autoTimer=setTimeout(playNext,getDuration());
     }
 
-    // Expose stop function so toggleAuto() can kill the timer instantly
-    window._stopAutoSequence = function () {
-      clearTimeout(autoTimer);
-      autoTimer = null;
-      stopPlayer(); // return to list page so user can pick manually
+    window._stopAutoSequence=function(){ clearTimeout(autoTimer); autoTimer=null; stopPlayer(); };
+
+    // Expose emit function so inline camera can use it
+    window._camSocketEmit=function(detected){
+      if(detected){ socket.emit("camera-person-detected"); }
+      else { socket.emit("camera-person-lost"); }
     };
 
-    // ── Person detected ──────────────────────────────────────────────────────
-    socket.on("person-detected", function () {
-      if (!window._autoEnabled) return; // manual mode — ignore
-      if (personPresent) return;
-      personPresent = true;
-      switchToSequence(HAPPY_SEQUENCE, true);
+    socket.on("person-detected",function(){
+      if(!window._autoEnabled) return;
+      if(personPresent) return;
+      personPresent=true;
+      switchToSequence(HAPPY_SEQUENCE,true);
     });
 
-    // ── Person lost ──────────────────────────────────────────────────────────
-    socket.on("person-lost", function () {
-      if (!window._autoEnabled) return; // manual mode — ignore
-      if (!personPresent) return;
-      personPresent = false;
-      switchToSequence(IDLE_SEQUENCE, true);
+    socket.on("person-lost",function(){
+      if(!window._autoEnabled) return;
+      if(!personPresent) return;
+      personPresent=false;
+      switchToSequence(IDLE_SEQUENCE,true);
     });
 
-    socket.on("connect", function () {
-      console.log("[Socket] connected:", socket.id);
-    });
+    socket.on("connect",function(){ console.log("[Socket] connected:",socket.id); });
+    socket.on("disconnect",function(){ console.log("[Socket] disconnected"); });
 
-    socket.on("disconnect", function () {
-      console.log("[Socket] disconnected");
-    });
-
-    // Start idle auto-sequence on load
-    switchToSequence(IDLE_SEQUENCE, true);
+    switchToSequence(IDLE_SEQUENCE,true);
   };
 
-  script.onerror = function () {
-    console.info("[Socket] Socket.IO not available. Skipping.");
-  };
-
+  script.onerror=function(){ console.info("[Socket] not available."); };
   document.head.appendChild(script);
 })();
+
+/* ═══ BOOT ══════════════════════════════════════════════════════════════════ */
+buildGrid();
+animateEyes();
 </script>
 
 </body>
