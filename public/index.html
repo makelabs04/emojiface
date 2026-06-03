@@ -457,6 +457,7 @@ let faceApiReady  = false;
 let camDetecting  = false;
 let lastExprIndex = -1;         // last expression sent to auto
 let personPresent = false;      // face visible?
+let noFaceSleepTimer = null;    // 15-second delay before going to sleep
 
 // Debounce: expression must be stable for N consecutive frames
 const EXPR_DEBOUNCE = 4;
@@ -531,7 +532,9 @@ async function runFaceDetect(){
         onFaceExpression(exprIdx);
       }
 
-      if(!personPresent){
+      if(!personPresent || noFaceSleepTimer){
+        // Cancel any pending sleep timer — face is back
+        if(noFaceSleepTimer){clearTimeout(noFaceSleepTimer);noFaceSleepTimer=null;}
         personPresent=true;
         if(window._camSocketEmit)window._camSocketEmit(true);
         camDot.className="detected";
@@ -542,16 +545,20 @@ async function runFaceDetect(){
     }else{
       camExprBadge.textContent="—";
       camExprBadge.className="";
-      if(personPresent){
-        personPresent=false;
-        lastExprIndex=-1;
-        pendingExprIndex=-1;
-        exprDebounceCount=0;
-        if(window._camSocketEmit)window._camSocketEmit(false);
+      if(personPresent && !noFaceSleepTimer){
+        // Start 15-second countdown before going to sleep
         camDot.className="";
         camStatusTxt.textContent="⬤ No face";
         camStatusTxt.className="cam-status-text";
-        onFaceExpression(-1); // face gone → idle
+        noFaceSleepTimer=setTimeout(function(){
+          noFaceSleepTimer=null;
+          personPresent=false;
+          lastExprIndex=-1;
+          pendingExprIndex=-1;
+          exprDebounceCount=0;
+          if(window._camSocketEmit)window._camSocketEmit(false);
+          onFaceExpression(-1); // face gone → sleep after 15s
+        },15000);
       }
     }
   }catch(e){}
@@ -706,11 +713,19 @@ async function initFallbackCam(){
     // Also respond to server-side events (from other camera sources / Raspberry)
     socket.on("person-detected",function(){
       if(!window._autoEnabled)return;
+      if(noFaceSleepTimer){clearTimeout(noFaceSleepTimer);noFaceSleepTimer=null;}
       if(!personPresent){personPresent=true;window._autoPlayExpression(EXPR_HAPPY);}
     });
     socket.on("person-lost",function(){
       if(!window._autoEnabled)return;
-      personPresent=false;showSleep();
+      // 15-second delay before sleep (matches camera detection behaviour)
+      if(!noFaceSleepTimer){
+        noFaceSleepTimer=setTimeout(function(){
+          noFaceSleepTimer=null;
+          personPresent=false;
+          showSleep();
+        },15000);
+      }
     });
 
     socket.on("connect",function(){console.log("[Socket] connected:",socket.id);});
