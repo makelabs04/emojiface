@@ -1,20 +1,3 @@
-/**
- * server.js — Robot Face | Hostinger VPS Edition
- *
- * KEY HOSTINGER DIFFERENCES vs Raspberry Pi version:
- *   1. Port comes from process.env.PORT (hPanel sets this automatically)
- *   2. No servo / GPIO code (no hardware on a cloud server)
- *   3. Socket.IO configured with polling+websocket transports so it works
- *      behind Hostinger's Nginx reverse proxy
- *   4. CORS origin must match your actual domain
- *   5. Entry point file must be named as set in hPanel (we use server.js)
- *
- * ESP32 ADDITION:
- *   - GET  /esp32/command  → ESP32 polls this to get "happy" or "neutral"
- *   - POST /esp32/ack      → ESP32 confirms it executed the command (optional)
- *   - The current command is updated whenever a Socket.IO person event fires
- */
-
 "use strict";
 
 const express  = require("express");
@@ -97,14 +80,25 @@ io.on("connection", (socket) => {
   socket.on("camera-person-detected", () => {
     console.log(`[IO] camera-person-detected from ${socket.id}`);
     io.emit("person-detected");
-    setEsp32Command("happy");      // ← update ESP32 command state
+    // expression-change will follow immediately with the actual expression
   });
 
   // Person left camera frame
   socket.on("camera-person-lost", () => {
     console.log(`[IO] camera-person-lost from ${socket.id}`);
     io.emit("person-lost");
-    setEsp32Command("neutral");    // ← update ESP32 command state
+    setEsp32Command("sleep");
+  });
+
+  // Expression changed — sent by index.html whenever _autoPlayExpression fires
+  // Payload: { expression: "neutral"|"happy"|"wink_left"|"wink_right"|"thinking"|"sleep" }
+  socket.on("expression-change", (data) => {
+    const expr = data && data.expression;
+    const VALID = ["neutral","happy","wink_left","wink_right","thinking","sleep"];
+    if (!VALID.includes(expr)) return;
+    console.log(`[IO] expression-change: ${expr} from ${socket.id}`);
+    io.emit("expression-change", { expression: expr }); // relay to other displays
+    setEsp32Command(expr);
   });
 
   socket.on("disconnect", () => {
