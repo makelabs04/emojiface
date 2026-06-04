@@ -686,24 +686,20 @@ async function initFallbackCam(){
       },300);
     }
 
-    // Called by face detection with expression index (-1 = no face)
     window._autoPlayExpression=function(exprIdx){
-      if(!window._autoEnabled)return;
-      clearTimeout(autoTimer);
-      if(exprIdx===-1){
-        personPresent=false;
-        showSleep();
-        emitExpression("sleep");
-      }else{
-        personPresent=true;
-        var seq=buildPersonSeq(exprIdx);
-        currentSeq=seq;autoIndex=0;
-        playSingle(seq[0]);
-        emitExpression(EXPR_NAMES[seq[0]]||"neutral");
-        autoIndex=1;
-        autoTimer=setTimeout(playNext,getDur());
-      }
-    };
+          if(!window._autoEnabled)return;
+          clearTimeout(autoTimer);
+          autoTimer=null;
+          if(exprIdx===-1){
+            personPresent=false;
+            showSleep();
+            emitExpression("sleep");
+          }else{
+            personPresent=true;
+            playSingle(exprIdx);
+            emitExpression(EXPR_NAMES[exprIdx]||"neutral");
+          }
+        };
 
     function buildPersonSeq(mainIdx){
       // Rotate around main expression with winks for liveliness
