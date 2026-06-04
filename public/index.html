@@ -669,6 +669,20 @@ async function initFallbackCam(){
       playSingle(EXPR_SLEEP);
     }
 
+    // Expression name map for socket emission
+    var EXPR_NAMES=["neutral","happy","wink_left","wink_right","thinking","sleep"];
+
+    // Emit expression to server (throttled — max once per 300ms)
+    var _lastEmittedExpr=null,_emitThrottle=null;
+    function emitExpression(name){
+      if(name===_lastEmittedExpr)return;
+      _lastEmittedExpr=name;
+      clearTimeout(_emitThrottle);
+      _emitThrottle=setTimeout(function(){
+        socket.emit("expression-change",{expression:name});
+      },300);
+    }
+
     // Called by face detection with expression index (-1 = no face)
     window._autoPlayExpression=function(exprIdx){
       if(!window._autoEnabled)return;
@@ -676,11 +690,13 @@ async function initFallbackCam(){
       if(exprIdx===-1){
         personPresent=false;
         showSleep();
+        emitExpression("sleep");
       }else{
         personPresent=true;
         var seq=buildPersonSeq(exprIdx);
         currentSeq=seq;autoIndex=0;
         playSingle(seq[0]);
+        emitExpression(EXPR_NAMES[seq[0]]||"neutral");
         autoIndex=1;
         autoTimer=setTimeout(playNext,getDur());
       }
