@@ -646,7 +646,9 @@ async function initFallbackCam(){
     function playNext(){
       if(!window._autoEnabled)return;
       clearTimeout(autoTimer);
-      playSingle(currentSeq[autoIndex%currentSeq.length]);
+      var idx=currentSeq[autoIndex%currentSeq.length];
+      playSingle(idx);
+      emitExpression(EXPR_NAMES[idx]||"neutral");
       autoIndex++;
       autoTimer=setTimeout(playNext,getDur());
     }
@@ -667,6 +669,7 @@ async function initFallbackCam(){
       autoTimer=null;
       currentSeq=null;
       playSingle(EXPR_SLEEP);
+      emitExpression("sleep");
     }
 
     // Expression name map for socket emission
